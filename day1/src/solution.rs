@@ -31,12 +31,12 @@ impl Add<i32> for Instruction {
     }
 }
 
-impl Add<(u32, i32)> for Instruction {
+impl Add<Instruction> for (u32, i32) {
     type Output = (u32, i32);
 
-    fn add(self, other: (u32, i32)) -> (u32, i32) {
-        let (result, acc) = other;
-        let total_steps = match self {
+    fn add(self, other: Instruction) -> (u32, i32) {
+        let (result, acc) = self;
+        let total_steps = match other {
             Instruction::Right(steps) => acc + steps,
             Instruction::Left(steps) => acc - steps,
         };
@@ -44,7 +44,7 @@ impl Add<(u32, i32)> for Instruction {
         let rotations = (total_steps / MAXIMUM).abs() as u32;
         return (
             result + rotations + ((total_steps <= 0 && acc != 0) as u32),
-            self + acc,
+            other + acc,
         );
     }
 }
@@ -71,9 +71,7 @@ pub fn solve_puzzle_new_instructions(document: &str) -> u32 {
     let (result, _) = document
         .lines()
         .map(Instruction::from)
-        .fold((0, START), |acc, instruction: Instruction| {
-            instruction + acc
-        });
+        .fold((0u32, START), Add::add);
 
     return result;
 }
