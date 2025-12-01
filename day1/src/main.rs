@@ -18,6 +18,11 @@ fn main() {
         "problem1 solution: {}",
         solution::solve_puzzle(input.as_str())
     );
+
+    println!(
+        "Problem2 soltion: {}",
+        solution::solve_puzzle_new_instructions(input.as_str())
+    );
 }
 
 #[cfg(test)]
