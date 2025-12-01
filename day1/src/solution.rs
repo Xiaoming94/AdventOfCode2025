@@ -31,19 +31,19 @@ impl Add<i32> for Instruction {
     }
 }
 
-impl Add<(i32, i32)> for Instruction {
-    type Output = (i32, i32);
+impl Add<(u32, i32)> for Instruction {
+    type Output = (u32, i32);
 
-    fn add(self, other: (i32, i32)) -> (i32, i32) {
+    fn add(self, other: (u32, i32)) -> (u32, i32) {
         let (result, acc) = other;
         let total_steps = match self {
             Instruction::Right(steps) => acc + steps,
             Instruction::Left(steps) => acc - steps,
         };
 
-        let rotations = (total_steps / MAXIMUM).abs();
+        let rotations = (total_steps / MAXIMUM).abs() as u32;
         return (
-            result + rotations + ((total_steps <= 0 && acc != 0) as i32),
+            result + rotations + ((total_steps <= 0 && acc != 0) as u32),
             self + acc,
         );
     }
@@ -75,7 +75,7 @@ pub fn solve_puzzle_new_instructions(document: &str) -> u32 {
             instruction + acc
         });
 
-    return result as u32;
+    return result;
 }
 
 #[cfg(test)]
