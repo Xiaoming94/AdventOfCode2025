@@ -1,4 +1,4 @@
-use super::solution;
+use crate::solution;
 
 use googletest::prelude::*;
 
@@ -12,6 +12,7 @@ const EXAMPLE_INPUT: &str = "L68\n\
     L99\n\
     R14\n\
     L82";
+
 #[test]
 fn day1problem1_test() -> Result<()> {
     let result = solution::solve_puzzle(EXAMPLE_INPUT);
