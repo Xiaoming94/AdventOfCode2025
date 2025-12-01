@@ -31,9 +31,22 @@ impl Add<i32> for Instruction {
     }
 }
 
+const START: i32 = 50;
+
 pub fn solve_puzzle(document: &str) -> u32 {
-    println!("{document}");
-    0
+    let (result, _) = document.lines().map(Instruction::from).fold(
+        (0, START),
+        |(res, acc), instruction: Instruction| {
+            let new_acc = instruction + acc;
+            if new_acc == 0 {
+                (res + 1, new_acc)
+            } else {
+                (res, new_acc)
+            }
+        },
+    );
+
+    return result;
 }
 
 #[cfg(test)]
@@ -56,11 +69,20 @@ mod solution_unittest {
     }
 
     #[gtest]
-    fn test_convert_to_instruction() -> Result<()> {
+    fn test_convert_to_left_instruction() -> Result<()> {
         let left_instruction: Instruction = "L32".into();
         verify_that!(
             left_instruction,
             matches_pattern!(Instruction::Left(eq(&32)))
+        )
+    }
+
+    #[gtest]
+    fn test_convert_to_right_instruction() -> Result<()> {
+        let right_instruction: Instruction = "R42".into();
+        verify_that!(
+            right_instruction,
+            matches_pattern!(Instruction::Right(eq(&42)))
         )
     }
 }
