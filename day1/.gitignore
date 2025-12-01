@@ -1,0 +1,11 @@
+# Ignoring binaries
+
+debug
+target
+
+# Rustfmt backups
+
+**/*.rs.bk
+
+# Mutants
+**/mutants.out*/
