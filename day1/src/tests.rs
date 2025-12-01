@@ -18,3 +18,9 @@ fn day1problem1_test() -> Result<()> {
     let result = solution::solve_puzzle(EXAMPLE_INPUT);
     verify_that!(result, eq(3))
 }
+
+#[test]
+fn day1problem2_test() -> Result<()> {
+    let result = solution::solve_puzzle_new_instructions(EXAMPLE_INPUT);
+    verify_that!(result, eq(6))
+}

@@ -31,6 +31,36 @@ impl Add<i32> for Instruction {
     }
 }
 
+impl Add<(i32, i32)> for Instruction {
+    type Output = (i32, i32);
+
+    fn add(self, other: (i32, i32)) -> (i32, i32) {
+        let (result, acc) = other;
+
+        if acc == 0 {
+            return (result, self + acc);
+        }
+        let d_res = match self {
+            Instruction::Right(steps) => {
+                if acc + steps >= 99 {
+                    1
+                } else {
+                    0
+                }
+            }
+            Instruction::Left(steps) => {
+                if acc - steps <= 0 {
+                    1
+                } else {
+                    0
+                }
+            }
+        };
+
+        return (d_res + result, self + acc);
+    }
+}
+
 const START: i32 = 50;
 
 pub fn solve_puzzle(document: &str) -> u32 {
@@ -47,6 +77,20 @@ pub fn solve_puzzle(document: &str) -> u32 {
     );
 
     return result;
+}
+
+pub fn solve_puzzle_new_instructions(document: &str) -> u32 {
+    let (result, _) = document.lines().map(Instruction::from).fold(
+        (0, START),
+        |acc, instruction: Instruction| {
+            let (res, current_acc) = acc;
+            println!("Current Results {res}, accumulator: {current_acc}");
+            println!("{:?}", instruction);
+            instruction + acc
+        },
+    );
+
+    return result as u32;
 }
 
 #[cfg(test)]
