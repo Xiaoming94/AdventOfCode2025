@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 googletest = "0.14.2"
+aoclibs = { path = "../utils/rust/aoclibs/" }

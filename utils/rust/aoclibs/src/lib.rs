@@ -1,14 +1,27 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+mod inputreader;
+
+pub fn unimplemented_solution(_input: &str) -> &str {
+    "not implemented yet"
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub fn read_input() -> String {
+    inputreader::read_input()
+}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[macro_export]
+macro_rules! aoc_main {
+    ($solution_fn: expr) => {
+        aoc_main!($solution_fn, aoclibs::unimplemented_solution);
+    };
+    ($solution1_fn: expr, $solution2_fn: expr) => {
+        fn main() {
+            let input = aoclibs::read_input();
+
+            println!("Puzzle input: {input}");
+
+            println!("problem1 solution: {}", $solution1_fn(input.as_str()));
+
+            println!("problem2 solution: {}", $solution2_fn(input.as_str()));
+        }
+    };
 }
