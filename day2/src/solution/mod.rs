@@ -34,13 +34,12 @@ fn is_invalid_id(id: &u64) -> bool {
 }
 
 fn is_invalid_subrange_id(id: &u64) -> bool {
-    let length = (id.checked_ilog10().unwrap_or(0) + 1);
+    let length = id.checked_ilog10().unwrap_or(0) + 1;
     if length < 2 {
         return false;
     }
 
     let half_length = length / 2;
-    println!("current id: {id}");
 
     for view_size in 1..=half_length {
         if length % view_size != 0 {
@@ -49,7 +48,6 @@ fn is_invalid_subrange_id(id: &u64) -> bool {
         let id_copy = *id; // Copying here to avoid side-effects
         let view_divider = 10u64.pow(view_size);
         let chunk = id_copy % view_divider;
-        println!("{}", chunk);
         let mut id_remains = id_copy / view_divider;
         while id_remains != 0 {
             let next_chunk = id_remains % view_divider;
@@ -85,8 +83,7 @@ pub fn find_sum_invalid_product_ids(id_ranges: &str) -> u64 {
 }
 
 pub fn find_sum_invalid_product_ids_v2(id_ranges: &str) -> u64 {
-    println!("{id_ranges}");
-    0
+    internal_sum_invalid_product_ids(id_ranges, true)
 }
 
 #[cfg(test)]
