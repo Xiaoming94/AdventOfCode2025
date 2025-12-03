@@ -15,27 +15,78 @@ fn parse_id_range(id_range: &str) -> (u64, u64) {
     );
 }
 
-fn find_invalid_products((idr_start, idr_end): (u64, u64)) -> Vec<u64> {
-    fn is_invalid_id(id: &u64) -> bool {
-        let length = id.checked_ilog10().unwrap_or(0) + 1;
-        if length < 2 || length % 2 != 0 {
-            return false;
-        }
-        let half_length = length / 2;
-        let first_half = id / (10u64.pow(half_length));
-        let second_half = id % (10u64.pow(half_length));
-        return first_half == second_half;
-    }
+fn find_invalid_product_ids<F: Fn(&u64) -> bool>(
+    (idr_start, idr_end): (u64, u64),
+    is_invalid_id: F,
+) -> Vec<u64> {
     (idr_start..=idr_end).filter(is_invalid_id).collect()
 }
 
-pub fn find_sum_invalid_product_ids(id_ranges: &str) -> u64 {
+fn is_invalid_id(id: &u64) -> bool {
+    let length = id.checked_ilog10().unwrap_or(0) + 1;
+    if length < 2 || length % 2 != 0 {
+        return false;
+    }
+    let half_length = length / 2;
+    let first_half = id / (10u64.pow(half_length));
+    let second_half = id % (10u64.pow(half_length));
+    return first_half == second_half;
+}
+
+fn is_invalid_subrange_id(id: &u64) -> bool {
+    let length = (id.checked_ilog10().unwrap_or(0) + 1);
+    if length < 2 {
+        return false;
+    }
+
+    let half_length = length / 2;
+    println!("current id: {id}");
+
+    for view_size in 1..=half_length {
+        if length % view_size != 0 {
+            continue;
+        }
+        let id_copy = *id; // Copying here to avoid side-effects
+        let view_divider = 10u64.pow(view_size);
+        let chunk = id_copy % view_divider;
+        println!("{}", chunk);
+        let mut id_remains = id_copy / view_divider;
+        while id_remains != 0 {
+            let next_chunk = id_remains % view_divider;
+            if next_chunk != chunk {
+                break;
+            }
+            id_remains = id_remains / view_divider;
+        }
+        if id_remains == 0 {
+            return true;
+        };
+    }
+    return false;
+}
+
+fn internal_sum_invalid_product_ids(id_ranges: &str, use_subrange: bool) -> u64 {
+    let invalid_product_id_fun = if use_subrange {
+        |id_range: (u64, u64)| find_invalid_product_ids(id_range, is_invalid_subrange_id)
+    } else {
+        |id_range: (u64, u64)| find_invalid_product_ids(id_range, is_invalid_id)
+    };
+
     id_ranges
         .split(',')
         .map(parse_id_range)
-        .map(find_invalid_products)
+        .map(invalid_product_id_fun)
         .flatten()
         .sum()
+}
+
+pub fn find_sum_invalid_product_ids(id_ranges: &str) -> u64 {
+    internal_sum_invalid_product_ids(id_ranges, false)
+}
+
+pub fn find_sum_invalid_product_ids_v2(id_ranges: &str) -> u64 {
+    println!("{id_ranges}");
+    0
 }
 
 #[cfg(test)]
@@ -52,7 +103,19 @@ mod tests {
 
     #[gtest]
     fn verify_finding_invalid_id() -> Result<()> {
-        let invalid_ids = find_invalid_products((11, 22));
+        let invalid_ids = find_invalid_product_ids((11, 22), is_invalid_id);
         verify_that!(invalid_ids[..], eq([11, 22]))
+    }
+
+    #[gtest]
+    fn verify_finding_invalid_id_with_subranges() -> Result<()> {
+        let invalid_ids = find_invalid_product_ids((11, 22), is_invalid_subrange_id);
+        verify_that!(invalid_ids[..], eq([11, 22]))
+    }
+
+    #[gtest]
+    fn verify_finding_invalid_id_with_subranges2() -> Result<()> {
+        let invalid_ids = find_invalid_product_ids((998, 1012), is_invalid_subrange_id);
+        verify_that!(invalid_ids[..], eq([999, 1010]))
     }
 }

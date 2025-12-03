@@ -10,3 +10,9 @@ fn test_day1problem1example() -> Result<()> {
     let solution: u64 = solution::find_sum_invalid_product_ids(EXAMPLE_INPUT);
     verify_that!(solution, eq(1227775554))
 }
+
+#[gtest]
+fn test_day2problem2example() -> Result<()> {
+    let solution: u64 = solution::find_sum_invalid_product_ids_v2(EXAMPLE_INPUT);
+    verify_that!(solution, eq(4174379265))
+}
