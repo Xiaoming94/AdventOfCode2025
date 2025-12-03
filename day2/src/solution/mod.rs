@@ -40,23 +40,26 @@ fn is_invalid_subrange_id(id: &u64) -> bool {
     }
 
     let half_length = length / 2;
+    fn is_invalid_chunk_id(mut id: u64, view_size: u32) -> bool {
+        let view_divider = 10u64.pow(view_size);
+        let chunk = id % view_divider;
+        id = id / view_divider;
+        while id != 0 {
+            let next_chunk = id % view_divider;
+            if next_chunk != chunk {
+                return false;
+            }
+            id = id / view_divider;
+        }
+        return true;
+    }
 
     for view_size in 1..=half_length {
         if length % view_size != 0 {
             continue;
         }
-        let id_copy = *id; // Copying here to avoid side-effects
-        let view_divider = 10u64.pow(view_size);
-        let chunk = id_copy % view_divider;
-        let mut id_remains = id_copy / view_divider;
-        while id_remains != 0 {
-            let next_chunk = id_remains % view_divider;
-            if next_chunk != chunk {
-                break;
-            }
-            id_remains = id_remains / view_divider;
-        }
-        if id_remains == 0 {
+
+        if is_invalid_chunk_id(*id, view_size) {
             return true;
         };
     }
