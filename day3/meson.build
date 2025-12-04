@@ -11,9 +11,12 @@ aoc_includes = include_directories('inc')
 dependencies = [
 ]
 
+cpp_sourcefiles = files('src/solution.cpp')
+
 exe = executable(
   'day3',
   'day3.cpp',
+  cpp_sourcefiles,
   install : true,
   dependencies : dependencies,
 )
@@ -29,6 +32,7 @@ gtest_main = gtest_proj.get_variable('gtest_main_dep')
 test_executable = executable(
   'day3_test',
   'tests.cpp',
+  cpp_sourcefiles,
   dependencies: [ gtest_dep, gtest_main ],
   include_directories: aoc_includes
 )
