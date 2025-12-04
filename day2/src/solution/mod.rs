@@ -54,11 +54,7 @@ fn is_invalid_subrange_id(id: &u64) -> bool {
         return true;
     }
 
-    for view_size in 1..=half_length {
-        if length % view_size != 0 {
-            continue;
-        }
-
+    for view_size in (1..=half_length).filter(|view_size| length % view_size == 0) {
         if is_invalid_chunk_id(*id, view_size) {
             return true;
         };
