@@ -12,6 +12,11 @@ int main()
   {
     input += line + "\n";
   }
+  if (input.back() == '\n')
+  {
+    input.pop_back();
+  }
   std::println("Problem input is: \n{}", input);
   std::println("Problem 1 solution is: {}", solution::findTotalMaxJoltage(input));
+  std::println("problem 2 solution is: {}", solution::findTotalMaxJoltageTwelveBats(input));
 }
