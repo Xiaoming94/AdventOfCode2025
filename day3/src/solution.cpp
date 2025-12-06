@@ -19,27 +19,35 @@ namespace solution
              std::ranges::to<std::vector>();
     }
 
-    uint32_t findMaxJoltage(const std::vector<uint32_t>& batteryBank, uint16_t noBatsToActivate)
+    uint64_t findMaxJoltage(const std::vector<uint32_t>& batteryBank, uint16_t noBatsToActivate)
     {
-      size_t largestPos{0u};
+      size_t startPos{0u};
 
       std::vector<uint16_t> chosenDigits;
       chosenDigits.reserve(noBatsToActivate);
 
-      for (auto remaining : std::views::iota(size_t{0}, noBatsToActivate) | std::views::reverse)
+      for (size_t remaining = noBatsToActivate; remaining > 0; remaining -= 1)
       {
-        std::println("remaining to find: {}", remaining);
-        auto remainingBats = batteryBank | std::views::enumerate | std::views::drop(largestPos) |
-                             std::views::reverse | std::views::drop(remaining) |
-                             std::views::reverse;
-        auto maxValue = [](auto lhs, auto rhs) { return std::get<1>(lhs) < std::get<1>(rhs); };
-        auto result = std::ranges::max_element(remainingBats, maxValue);
-        const auto& [idx, value] = *result;
-        largestPos = idx + 1;
-        chosenDigits.emplace_back(value);
+        auto endPos = batteryBank.size() - remaining + 1;
+        auto remainingBats =
+            batteryBank | std::views::drop(startPos) | std::views::take(endPos - startPos);
+        auto value = std::ranges::max(remainingBats);
+        auto value_it = std::ranges::find(remainingBats, value);
+        if (value_it != batteryBank.end())
+        {
+          auto idx = std::ranges::distance(batteryBank.begin(), value_it);
+          startPos = idx + 1;
+        }
+        else
+        {
+          std::println("Bad Input");
+          std::terminate();
+        }
+        chosenDigits.push_back(value);
       }
+      std::println("found number of digit: {}", chosenDigits.size());
       auto result =
-          std::ranges::fold_left(chosenDigits, uint32_t{0}, [](auto accumulator, auto current)
+          std::ranges::fold_left(chosenDigits, uint64_t{0}, [](auto accumulator, auto current)
                                  { return accumulator * 10 + current; });
 
       std::println("Found result: {}", result);
