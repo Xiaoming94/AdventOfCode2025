@@ -38,4 +38,4 @@ test_executable = executable(
   include_directories: aoc_includes
 )
 
-test('basic', test_executable)
+test('basic', test_executable, env : ['GTEST_COLOR=yes'])
