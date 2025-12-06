@@ -1,0 +1,15 @@
+BasedOnStyle: Google
+
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+
+PointerAlignment: Left
+ColumnLimit: 100
+
+# Tell clang-format this is C++ (in case your version supports it)
+Language: Cpp
