@@ -25,18 +25,18 @@ namespace solution
       std::vector<uint16_t> chosenDigits;
       chosenDigits.reserve(noBatsToActivate);
 
+      auto maxValue = [](const auto& lhs, const auto& rhs)
+      {
+        auto& [index1, value1] = lhs;
+        auto& [index2, value2] = rhs;
+        return value1 < value2;
+      };
+
       for (size_t remaining = noBatsToActivate; remaining > 0; remaining -= 1)
       {
         auto endPos = batteryBank.size() - remaining + 1;
         auto remainingBats = batteryBank | std::views::enumerate | std::views::drop(startPos) |
                              std::views::take(endPos - startPos);
-
-        auto maxValue = [](const auto& lhs, const auto& rhs)
-        {
-          auto& [index1, value1] = lhs;
-          auto& [index2, value2] = rhs;
-          return value1 < value2;
-        };
 
         auto result = std::ranges::max_element(remainingBats, maxValue);
         const auto& [idx, value] = *result;
