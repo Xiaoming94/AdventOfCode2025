@@ -19,6 +19,7 @@ exe = executable(
   cpp_sourcefiles,
   install : true,
   dependencies : dependencies,
+  include_directories: aoc_includes,
 )
 
 gtest_proj = subproject(
