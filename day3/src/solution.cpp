@@ -1,7 +1,6 @@
 #include "solution.h"
 
 #include <algorithm>
-#include <print>
 #include <ranges>
 #include <type_traits>
 #include <vector>
@@ -29,28 +28,26 @@ namespace solution
       for (size_t remaining = noBatsToActivate; remaining > 0; remaining -= 1)
       {
         auto endPos = batteryBank.size() - remaining + 1;
-        auto remainingBats =
-            batteryBank | std::views::drop(startPos) | std::views::take(endPos - startPos);
-        auto value = std::ranges::max(remainingBats);
-        auto value_it = std::ranges::find(remainingBats, value);
-        if (value_it != batteryBank.end())
+        auto remainingBats = batteryBank | std::views::enumerate | std::views::drop(startPos) |
+                             std::views::take(endPos - startPos);
+
+        auto maxValue = [](const auto& lhs, const auto& rhs)
         {
-          auto idx = std::ranges::distance(batteryBank.begin(), value_it);
-          startPos = idx + 1;
-        }
-        else
-        {
-          std::println("Bad Input");
-          std::terminate();
-        }
+          auto& [index1, value1] = lhs;
+          auto& [index2, value2] = rhs;
+          return value1 < value2;
+        };
+
+        auto result = std::ranges::max_element(remainingBats, maxValue);
+        const auto& [idx, value] = *result;
+
+        startPos = idx + 1;
         chosenDigits.push_back(value);
       }
-      std::println("found number of digit: {}", chosenDigits.size());
       auto result =
           std::ranges::fold_left(chosenDigits, uint64_t{0}, [](auto accumulator, auto current)
                                  { return accumulator * 10 + current; });
 
-      std::println("Found result: {}", result);
       return result;
     }
 
