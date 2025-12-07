@@ -55,7 +55,11 @@ class SolutionInternal {
     long findAccessibleToiletPaper(String input) {
         this.parseInput(input);
 
-        return storageMap.keySet().stream().filter(pos -> isAccessibleToiletPaper(pos)).count();
+        return storageMap
+            .keySet()
+            .stream()
+            .filter(pos -> isAccessibleToiletPaper(pos))
+            .count();
     }
 
     void parseInput(String input) {
