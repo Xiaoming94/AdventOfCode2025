@@ -9,6 +9,7 @@ public class Main {
         while (sc.hasNextLine()) {
             input += sc.nextLine() + "\n";
         }
+        sc.close();
         return input;
     }
 
@@ -16,5 +17,6 @@ public class Main {
         var input = readInput();
         System.out.println(String.format("input is: %s", input));
         System.out.println(String.format("Solution for problem 1: %d", Solution.solveProblem1(input)));
+        System.out.println(String.format("Solution for probelm 2: %d", Solution.solveProblem2(input)));
     }
 }
