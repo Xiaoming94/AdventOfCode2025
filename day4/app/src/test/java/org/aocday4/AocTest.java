@@ -21,4 +21,9 @@ public class AocTest {
         var result = Solution.solveProblem1(EXAMPLE_INPUT);
         assertEquals(13, result);
     }
+
+    @Test public void testProblem2Solution() {
+        var result = Solution.solveProblem2(EXAMPLE_INPUT);
+        assertEquals(43, result);
+    }
 }

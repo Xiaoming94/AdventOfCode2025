@@ -2,20 +2,27 @@ package org.aocday4;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class Solution {
     public static long solveProblem1(String input) {
-        var solutionInternal = new SolutionInternal();
-        return solutionInternal.findAccessibleToiletPaper(input);
+        var solutionInternal = new SolutionInternal(input);
+        return solutionInternal.findAccessibleToiletPaper();
+    }
+
+    public static long solveProblem2(String input) {
+        var solutionInternal = new SolutionInternal(input);
+        return solutionInternal.countTotalRemovePaper();
     }
 
 }
 
 class SolutionInternal {
-    public SolutionInternal() {
+    public SolutionInternal(String input) {
         searchDirections = new ArrayList<>();
         for (int i = -1; i <= 1; i += 1) {
             for (int j = -1; j <= 1; j += 1) {
@@ -25,6 +32,7 @@ class SolutionInternal {
                 }
             }
         }
+        this.parseInput(input);
     }
 
     boolean isAccessibleToiletPaper(Position pos) {
@@ -45,21 +53,39 @@ class SolutionInternal {
             if (storageMap.containsKey(posToCheck)) {
                 adjacentPapers += storageMap.get(posToCheck) == Token.Paper ? 1 : 0;
             }
-            if (adjacentPapers == 4) {
+            if (adjacentPapers >= 4) {
                 return false;
             }
         }
         return true;
     }
 
-    long findAccessibleToiletPaper(String input) {
-        this.parseInput(input);
+    long findAccessibleToiletPaper() {
 
         return storageMap
             .keySet()
             .stream()
             .filter(pos -> isAccessibleToiletPaper(pos))
             .count();
+    }
+
+    Stream<Position> filterRemovablePaper(Set<Position> positions) {
+        return positions.stream().filter(this::isAccessibleToiletPaper);
+    }
+
+    long countTotalRemovePaper() {
+        int totalPapersToRemove = 0;
+        var foundRemoveablePaper = filterRemovablePaper(storageMap.keySet()).toList();
+
+        while (! foundRemoveablePaper.isEmpty()) {
+            totalPapersToRemove += foundRemoveablePaper.size();
+            for (var pos : foundRemoveablePaper) {
+                storageMap.replace(pos, Token.Dot);
+            }
+            foundRemoveablePaper = filterRemovablePaper(storageMap.keySet()).toList();
+        }
+
+        return totalPapersToRemove;
     }
 
     void parseInput(String input) {
@@ -72,7 +98,7 @@ class SolutionInternal {
                             .range(0, lineArray.length)
                             .forEach(j -> {
                                 var token = charToToken(lineArray[j]);
-                                storageMap.put(new Position(i, j), token);
+                                storageMap.put(new Position(j, i), token);
                             });
                 });
 
