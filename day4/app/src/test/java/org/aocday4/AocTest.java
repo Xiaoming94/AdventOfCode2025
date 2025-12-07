@@ -1,20 +1,20 @@
 package org.aocday4;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AocTest {
     static final String EXAMPLE_INPUT = """
-        ..xx.xx@x.
-        x@@.@.@.@@
-        @@@@@.x.@@
+        ..@@.@@@@.
+        @@@.@.@.@@
+        @@@@@.@.@@
         @.@@@@..@.
-        x@.@@@@.@x
+        @@.@@@@.@@
         .@@@@@@@.@
         .@.@.@.@@@
-        x.@@@.@@@@
+        @.@@@.@@@@
         .@@@@@@@@.
-        x.x.@@@.x.
+        @.@.@@@.@.
         """;
 
     @Test public void testProblem1Solution() {
