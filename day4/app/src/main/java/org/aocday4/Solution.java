@@ -42,22 +42,14 @@ class SolutionInternal {
             return false;
         }
 
-        var posX = pos.x();
-        var posY = pos.y();
-        int adjacentPapers = 0;
+        var countPaperFound = searchDirections
+            .stream()
+            .map(pos::add)
+            .filter(storageMap::containsKey)
+            .filter(posToCheck -> storageMap.get(posToCheck) == Token.Paper)
+            .count();
 
-        for (var dpos : searchDirections) {
-            var newPosx = posX + dpos.x();
-            var newPosy = posY + dpos.y();
-            var posToCheck = new Position(newPosx, newPosy);
-            if (storageMap.containsKey(posToCheck)) {
-                adjacentPapers += storageMap.get(posToCheck) == Token.Paper ? 1 : 0;
-            }
-            if (adjacentPapers >= 4) {
-                return false;
-            }
-        }
-        return true;
+        return countPaperFound < 4;
     }
 
     long findAccessibleToiletPaper() {
@@ -120,6 +112,11 @@ class SolutionInternal {
     }
 
     private record Position(int x, int y) {
+        Position add(Position other) {
+            var newX = this.x() + other.x();
+            var newY = this.y() + other.y();
+            return new Position(newX, newY);
+        }
     }
 
     private Map<Position, Token> storageMap = new HashMap<>();
