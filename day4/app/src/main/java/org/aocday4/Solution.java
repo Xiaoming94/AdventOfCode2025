@@ -65,7 +65,7 @@ class SolutionInternal {
         return storageMap
             .keySet()
             .stream()
-            .filter(pos -> isAccessibleToiletPaper(pos))
+            .filter(this::isAccessibleToiletPaper)
             .count();
     }
 
