@@ -1,29 +1,19 @@
 def merge_ranges(unmerged_ranges: list[tuple[int, int]]) -> list[tuple[int, int]]:
-    has_merges = True
-    merged_ranges = unmerged_ranges.copy()
-    while has_merges:
-        has_merges = False
-        ranges_copy = merged_ranges.copy()
-        merged_ranges.clear()
-        ranges_copy_mutable = ranges_copy.copy()
-        for i, r_fresh in enumerate(ranges_copy):
-            if not r_fresh in ranges_copy_mutable:
-                break
+    unmerged_ranges.sort(key=lambda id_range: id_range[0])
+    merged = list()
 
-            n_ranges = len(ranges_copy_mutable)
-            for j in range(i+1, n_ranges):
-                lower1, upper1 = r_fresh
-                r_fresh2 = ranges_copy_mutable[j]
-                lower2, upper2 = r_fresh2
-                if not (upper1 < lower2 or lower1 > upper2): # Check weather they are overlapping
-                    r_fresh = (min(lower1, lower2), max(upper1, upper2))
-                    ranges_copy_mutable.remove(r_fresh2)
-                    has_merges = True
+    current_lower, current_upper = unmerged_ranges[0]
+    for next_lower, next_upper in unmerged_ranges[1:]:
+        if current_upper >= next_lower: # These two are overlapping
+            current_upper = max(current_upper, next_upper)
+        else:
 
-            merged_ranges.append(r_fresh)
+            #no overlaps, adding them to merged
+            merged.append((current_lower, current_upper))
+            current_lower, current_upper = next_lower, next_upper
 
-    return merged_ranges
-
+    merged.append((current_lower, current_upper))
+    return merged
 
 def create_ranges(ranges_str: str) -> list[tuple[int, int]]:
     def create_fresh_range(ranges_line: str) -> tuple[ int, int ]:
