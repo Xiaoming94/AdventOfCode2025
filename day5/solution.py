@@ -46,4 +46,6 @@ def solve_problem1(input: str):
     return find_fresh_ingredients(ranges, ingredient_ids)
 
 def solve_problem2(input: str):
-    return 0
+    [ranges_str, _] = input.split('\n\n')
+    fresh_ranges = create_ranges(ranges_str)
+    return sum([(upper - lower) + 1 for lower, upper in fresh_ranges])
