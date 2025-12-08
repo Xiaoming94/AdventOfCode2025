@@ -44,3 +44,6 @@ def solve_problem1(input: str):
     ingredient_ids = transform_to_int_ids(ingredient_liststr)
 
     return find_fresh_ingredients(ranges, ingredient_ids)
+
+def solve_problem2(input: str):
+    return 0

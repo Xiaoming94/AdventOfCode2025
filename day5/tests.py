@@ -18,5 +18,9 @@ class TestAoc2025Day5(unittest.TestCase):
         result = solution.solve_problem1(self.input)
         self.assertEqual(result, 3)
 
+    def test_problem2solution(self):
+        result = solution.solve_problem2(self.input)
+        self.assertEqual(result, 14)
+
 if __name__ == '__main__':
     unittest.main()
