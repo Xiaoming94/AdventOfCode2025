@@ -5,7 +5,7 @@ function run() {
     printf "executing target: %s\n" $target
     case "$target" in
         test)
-            pytest tests.py
+            pytest tests.py --verbose
             ;;
         main)
             python main.py
