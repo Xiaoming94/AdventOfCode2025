@@ -5,7 +5,7 @@ function run() {
     printf "executing target: %s\n" $target
     case "$target" in
         test)
-            python -m unittest tests.py --verbose
+            pytest tests.py
             ;;
         main)
             python main.py
@@ -17,9 +17,12 @@ function run() {
 function setup_python() {
     local envpath="$PWD/env"
     if [[ ! -d "$envpath" ]]; then
-        printf "Setting up python venv for for %s\n" $(python --version)
+        local python_v=$(python --version)
+        printf "Setting up python venv for for %s\n" $python_v
         python -m venv $envpath
     fi
+
+    printf "Activating Python VirtualEnv\n"
     source "$envpath/bin/activate"
 }
 
