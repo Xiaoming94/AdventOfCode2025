@@ -71,7 +71,9 @@ pub(crate) fn solve_problem1(input: &str) -> u64 {
 
 #[cfg(test)]
 mod solution_unittest {
-    use super::{Add, MathProblem};
+    use std::marker::PhantomData;
+
+    use super::{Add, MathProblem, Mul};
     use googletest::prelude::*;
 
     #[gtest]
@@ -79,5 +81,25 @@ mod solution_unittest {
         let input = vec!["42", "32", "1"];
         let math_problem = MathProblem::<Add>::new(input);
         verify_that!(math_problem.operands, eq(&vec![42_u64, 32_u64, 1_u64]))
+    }
+
+    #[gtest]
+    fn verify_math_problem_evaluation() -> Result<()> {
+        let math_problem = MathProblem::<Add> {
+            operands: vec![1, 2, 3],
+            operator: PhantomData,
+        };
+
+        verify_that!(math_problem.evaluate(), eq(6))
+    }
+
+    #[gtest]
+    fn verify_mul_problem_evaluation() -> Result<()> {
+        let math_problem = MathProblem::<Mul> {
+            operands: vec![1, 2, 3],
+            operator: PhantomData,
+        };
+
+        verify_that!(math_problem.evaluate(), eq(6))
     }
 }
