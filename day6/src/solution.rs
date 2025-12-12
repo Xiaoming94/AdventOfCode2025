@@ -83,6 +83,10 @@ pub(crate) fn solve_problem1(input: &str) -> u64 {
         .sum();
 }
 
+pub(crate) fn solve_problem2(_input: &str) -> u64 {
+    0
+}
+
 #[cfg(test)]
 mod unittests {
 
