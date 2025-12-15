@@ -60,16 +60,19 @@ fn parse_problem(op: &str, operands: Vec<&str>) -> MathProblemPtr {
     }
 }
 
-pub(crate) fn solve_problem1(input: &str) -> u64 {
-    let problem_as_vectors: Vec<Vec<_>> = input
+fn parse_to_vectors(input: &str) -> Vec<Vec<&str>> {
+    input
         .lines()
         .map(|line| line.split_whitespace().collect::<Vec<_>>())
-        .collect();
+        .collect()
+}
 
+pub(crate) fn solve_problem1(input: &str) -> u64 {
+    let problem_as_vectors = parse_to_vectors(input);
     let operators = problem_as_vectors.last().unwrap();
     let number_of_operands = problem_as_vectors.len() - 1;
 
-    return operators
+    operators
         .into_iter()
         .enumerate()
         .map(|(i, op)| {
@@ -80,10 +83,12 @@ pub(crate) fn solve_problem1(input: &str) -> u64 {
             parse_problem(op, operands)
         })
         .map(|problem| problem.evaluate())
-        .sum();
+        .sum()
 }
 
-pub(crate) fn solve_problem2(_input: &str) -> u64 {
+pub(crate) fn solve_problem2(input: &str) -> u64 {
+    let problem_as_vectors = parse_to_vectors(input);
+    println!("problem: {:?}", problem_as_vectors);
     0
 }
 
