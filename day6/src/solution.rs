@@ -47,12 +47,7 @@ impl MathProblem for MulProblem {
     }
 }
 
-fn parse_problem(op: &str, operands: Vec<&str>) -> MathProblemPtr {
-    let operands: Vec<u64> = operands
-        .into_iter()
-        .map(|operand| operand.parse::<u64>().unwrap())
-        .collect();
-
+fn parse_problem(op: &str, operands: Vec<u64>) -> MathProblemPtr {
     match op {
         "+" => Box::new(AddProblem::create_problem(operands)),
         "*" => Box::new(MulProblem::create_problem(operands)),
@@ -76,9 +71,9 @@ pub(crate) fn solve_problem1(input: &str) -> u64 {
         .into_iter()
         .enumerate()
         .map(|(i, op)| {
-            let operands: Vec<&str> = problem_as_vectors[0..number_of_operands]
+            let operands: Vec<u64> = problem_as_vectors[0..number_of_operands]
                 .iter()
-                .map(|line| line[i])
+                .map(|line| line[i].parse::<u64>().unwrap())
                 .collect();
             parse_problem(op, operands)
         })
@@ -88,8 +83,26 @@ pub(crate) fn solve_problem1(input: &str) -> u64 {
 
 pub(crate) fn solve_problem2(input: &str) -> u64 {
     let problem_as_vectors = parse_to_vectors(input);
-    println!("problem: {:?}", problem_as_vectors);
+    let operators = problem_as_vectors.last().unwrap();
+    let number_of_operands = problem_as_vectors.len() - 1;
+
     0
+    //operators
+    //    .into_iter()
+    //    .enumerate()
+    //    .map(|(i, op)| {
+    //        let operands_str: Vec<&str> = problem_as_vectors[0..number_of_operands]
+    //            .iter()
+    //            .map(|line| line[i])
+    //            .collect();
+    //        let operands: Vec<&str> = read_cnstyle_operands(operands_str)
+    //            .iter()
+    //            .map(|operand| operand.as_str())
+    //            .collect();
+    //        parse_problem(op, operands)
+    //    })
+    //    .map(|problem| problem.evaluate())
+    //    .sum()
 }
 
 #[cfg(test)]
@@ -101,7 +114,7 @@ mod unittests {
 
     #[gtest]
     fn test_parse_add_problem() -> Result<()> {
-        let operands = vec!["5", "4", "2"];
+        let operands: Vec<u64> = vec![5, 4, 2];
         let operator = "+";
         let problem = parse_problem(operator, operands);
         verify_that!(problem.evaluate(), eq(11))
@@ -109,7 +122,7 @@ mod unittests {
 
     #[gtest]
     fn test_parse_mul_problem() -> Result<()> {
-        let operands = vec!["5", "4", "2"];
+        let operands: Vec<u64> = vec![5, 4, 2];
         let operator = "*";
         let problem = parse_problem(operator, operands);
         verify_that!(problem.evaluate(), eq(40))
