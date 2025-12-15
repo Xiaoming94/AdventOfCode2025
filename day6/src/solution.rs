@@ -48,6 +48,7 @@ impl MathProblem for MulProblem {
 }
 
 fn parse_problem(op: &str, operands: Vec<u64>) -> MathProblemPtr {
+    println!("Operands in problem: {:?}", operands);
     match op {
         "+" => Box::new(AddProblem::create_problem(operands)),
         "*" => Box::new(MulProblem::create_problem(operands)),
@@ -59,6 +60,41 @@ fn parse_to_vectors(input: &str) -> Vec<Vec<&str>> {
     input
         .lines()
         .map(|line| line.split_whitespace().collect::<Vec<_>>())
+        .collect()
+}
+
+fn read_cnstyle_operands(operands: Vec<&str>) -> Vec<u64> {
+    fn pad(mut line: String, n_padding: usize) -> String {
+        let padding = ".";
+        line.push_str(&padding.repeat(n_padding));
+        line
+    }
+
+    let longest_line: usize = operands
+        .iter()
+        .map(|s| s.len())
+        .max()
+        .expect("Bad number of operands");
+
+    let padded_operands: Vec<String> = operands
+        .into_iter()
+        .map(|line| pad(line.to_string(), longest_line - line.len()))
+        .collect();
+
+    (0..longest_line)
+        .into_iter()
+        .map(|col_i| {
+            let mut operands_str = String::new();
+            for line in &padded_operands {
+                if let Some(c) = line.chars().nth(col_i) {
+                    if c != '.' {
+                        operands_str.push(c);
+                    }
+                }
+            }
+            println!("{:?}", operands_str);
+            operands_str.parse::<u64>().unwrap()
+        })
         .collect()
 }
 
@@ -86,23 +122,18 @@ pub(crate) fn solve_problem2(input: &str) -> u64 {
     let operators = problem_as_vectors.last().unwrap();
     let number_of_operands = problem_as_vectors.len() - 1;
 
-    0
-    //operators
-    //    .into_iter()
-    //    .enumerate()
-    //    .map(|(i, op)| {
-    //        let operands_str: Vec<&str> = problem_as_vectors[0..number_of_operands]
-    //            .iter()
-    //            .map(|line| line[i])
-    //            .collect();
-    //        let operands: Vec<&str> = read_cnstyle_operands(operands_str)
-    //            .iter()
-    //            .map(|operand| operand.as_str())
-    //            .collect();
-    //        parse_problem(op, operands)
-    //    })
-    //    .map(|problem| problem.evaluate())
-    //    .sum()
+    operators
+        .into_iter()
+        .enumerate()
+        .map(|(i, op)| {
+            let operands: Vec<&str> = problem_as_vectors[0..number_of_operands]
+                .iter()
+                .map(|line| line[i])
+                .collect();
+            parse_problem(op, read_cnstyle_operands(operands))
+        })
+        .map(|problem| problem.evaluate())
+        .sum()
 }
 
 #[cfg(test)]
