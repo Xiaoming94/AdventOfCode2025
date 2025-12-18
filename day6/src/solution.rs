@@ -48,7 +48,6 @@ impl MathProblem for MulProblem {
 }
 
 fn parse_problem(op: &str, operands: Vec<u64>) -> MathProblemPtr {
-    println!("Operands in problem: {:?}", operands);
     match op {
         "+" => Box::new(AddProblem::create_problem(operands)),
         "*" => Box::new(MulProblem::create_problem(operands)),
@@ -56,50 +55,49 @@ fn parse_problem(op: &str, operands: Vec<u64>) -> MathProblemPtr {
     }
 }
 
-fn parse_to_vectors(input: &str) -> Vec<Vec<&str>> {
-    input
+fn read_operands(input: &str, lines_to_read: usize) -> Vec<Vec<u64>> {
+    let mut operands_per_problem: Vec<Vec<u64>> = Vec::new();
+    let char_matrix = input
         .lines()
-        .map(|line| line.split_whitespace().collect::<Vec<_>>())
-        .collect()
-}
+        .map(|line| line.chars().collect::<Vec<char>>())
+        .collect::<Vec<Vec<char>>>();
 
-fn read_cnstyle_operands(operands: Vec<&str>) -> Vec<u64> {
-    fn pad(mut line: String, n_padding: usize) -> String {
-        let padding = ".";
-        line.push_str(&padding.repeat(n_padding));
-        line
+    let n_columns: usize = char_matrix.first().unwrap().len();
+
+    if char_matrix.iter().any(|line| line.len() != n_columns) {
+        panic!("Bad Input format");
     }
 
-    let longest_line: usize = operands
-        .iter()
-        .map(|s| s.len())
-        .max()
-        .expect("Bad number of operands");
+    const RADIX: u32 = 10;
+    let mut operands: Vec<u64> = Vec::new();
+    for col in (0..n_columns).rev() {
+        let column: Vec<char> = (0..lines_to_read)
+            .map(|row_i| char_matrix[row_i][col])
+            .collect();
 
-    let padded_operands: Vec<String> = operands
-        .into_iter()
-        .map(|line| pad(line.to_string(), longest_line - line.len()))
-        .collect();
+        if column.iter().all(|c| *c == ' ') {
+            operands_per_problem.push(operands.clone());
+            operands.clear();
+        } else {
+            let operand = column
+                .into_iter()
+                .filter(|c| *c != ' ')
+                .map(|c| c.to_digit(RADIX).map(u64::from).unwrap())
+                .fold(0, |acc, dig| acc * 10 + dig);
+            operands.push(operand);
+        }
+    }
+    operands_per_problem.push(operands);
 
-    (0..longest_line)
-        .into_iter()
-        .map(|col_i| {
-            let mut operands_str = String::new();
-            for line in &padded_operands {
-                if let Some(c) = line.chars().nth(col_i) {
-                    if c != '.' {
-                        operands_str.push(c);
-                    }
-                }
-            }
-            println!("{:?}", operands_str);
-            operands_str.parse::<u64>().unwrap()
-        })
-        .collect()
+    operands_per_problem.into_iter().rev().collect()
 }
 
 pub(crate) fn solve_problem1(input: &str) -> u64 {
-    let problem_as_vectors = parse_to_vectors(input);
+    let problem_as_vectors: Vec<Vec<&str>> = input
+        .lines()
+        .map(|line| line.split_whitespace().collect())
+        .collect();
+
     let operators = problem_as_vectors.last().unwrap();
     let number_of_operands = problem_as_vectors.len() - 1;
 
@@ -118,20 +116,18 @@ pub(crate) fn solve_problem1(input: &str) -> u64 {
 }
 
 pub(crate) fn solve_problem2(input: &str) -> u64 {
-    let problem_as_vectors = parse_to_vectors(input);
-    let operators = problem_as_vectors.last().unwrap();
-    let number_of_operands = problem_as_vectors.len() - 1;
+    let operators: Vec<&str> = input
+        .lines()
+        .next_back()
+        .unwrap_or_else(|| panic!("Invalid input"))
+        .split_whitespace()
+        .collect();
 
-    operators
-        .into_iter()
-        .enumerate()
-        .map(|(i, op)| {
-            let operands: Vec<&str> = problem_as_vectors[0..number_of_operands]
-                .iter()
-                .map(|line| line[i])
-                .collect();
-            parse_problem(op, read_cnstyle_operands(operands))
-        })
+    let lines_to_read = input.lines().count() - 1;
+    let operands: Vec<Vec<u64>> = read_operands(input, lines_to_read);
+
+    std::iter::zip(operators, operands)
+        .map(|(op, operand)| parse_problem(op, operand))
         .map(|problem| problem.evaluate())
         .sum()
 }
