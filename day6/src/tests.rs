@@ -1,10 +1,12 @@
 use crate::solution;
 use googletest::prelude::*;
 
-const EXAMPLE_INPUT: &str = "123 328  51 64\n\
-     45 64  387 23\n\
-     6 98  215 314\n\
-     *   +   *   +  ";
+const EXAMPLE_INPUT: &str = concat!(
+    "123 328  51 64 \n",
+    " 45 64  387 23 \n",
+    "  6 98  215 314\n",
+    "*   +   *   +  \n"
+);
 
 #[gtest]
 fn test_problem1solution() -> Result<()> {
