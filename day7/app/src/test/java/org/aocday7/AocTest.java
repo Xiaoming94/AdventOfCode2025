@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AocTest {
     @Test void problem1Solution() {
-        System.out.println("Testing");
+        var result = 7 + 5;
+        assertEquals(result, 12);
     }
 }
