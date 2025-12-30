@@ -10,9 +10,11 @@ package org.aocday7;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 public class Solution {
@@ -84,6 +86,7 @@ class TachyonBeamTracer {
     public long calcTotalSplits() {
         Queue<Coordinate> lasersToRun = new ArrayDeque<>();
         lasersToRun.addAll(startingPositions);
+        Set<Coordinate> visitedStartingNodes = new HashSet<>();
         while(!lasersToRun.isEmpty()) {
             var laserPosition = lasersToRun.remove();
             while(tachyonBeamMap.containsKey(laserPosition) &&
@@ -95,9 +98,14 @@ class TachyonBeamTracer {
                     var hits = splitterHits.get(nextPosition);
                     splitterHits.replace(nextPosition, hits + 1);
                     var laserLeft = new Coordinate(nextPosition.x()-1, nextPosition.y());
+                    if (visitedStartingNodes.add(laserLeft)) {
+                        lasersToRun.add(laserLeft);
+                    }
+
                     var laserRight = new Coordinate(nextPosition.x()+1, nextPosition.y());
-                    lasersToRun.add(laserLeft);
-                    lasersToRun.add(laserRight);
+                    if (visitedStartingNodes.add(laserRight)) {
+                        lasersToRun.add(laserRight);
+                    }
                 }
 
                 laserPosition = nextPosition;
