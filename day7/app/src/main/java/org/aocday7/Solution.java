@@ -4,16 +4,19 @@
 
 package org.aocday7;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.stream.IntStream;
 
 public class Solution {
-    public static int solveProblem1(String input) {
-        new TachyonBeamTracer().createTachyonMap(input);
-        return 0;
+    public static long solveProblem1(String input) {
+        var tachyonBeamTracer = new TachyonBeamTracer();
+        tachyonBeamTracer.createTachyonMap(input);
+        return tachyonBeamTracer.calcTotalSplits();
     }
 }
 
@@ -51,10 +54,44 @@ class TachyonBeamTracer {
                         if ( parsedMapSymbol == MapSymbol.START ) {
                             startingPositions.add(coordinate);
                         }
+
+                        if (parsedMapSymbol == MapSymbol.SPLIT) {
+                            splitterHits.put(coordinate, 0);
+                        }
+
                         this.tachyonBeamMap.put(coordinate, parsedMapSymbol);
                     });
             });
 
+    }
+
+    private Coordinate moveLaser(Coordinate currentLaserPos) {
+        return new Coordinate(currentLaserPos.x(), currentLaserPos.y() + 1);
+    }
+
+    public long calcTotalSplits() {
+        Queue<Coordinate> lasersToRun = new ArrayDeque<>();
+        lasersToRun.addAll(startingPositions);
+        while(!lasersToRun.isEmpty()) {
+            var laserPosition = lasersToRun.remove();
+            while(tachyonBeamMap.containsKey(laserPosition) ||
+                    !(tachyonBeamMap.get(laserPosition) != MapSymbol.SPLIT)) {
+                var nextPosition = moveLaser(laserPosition);
+                // Look ahead
+                var nextSymbol = tachyonBeamMap.get(nextPosition);
+                if (nextSymbol == MapSymbol.SPLIT) {
+                    var hits = splitterHits.get(nextPosition);
+                    splitterHits.replace(nextPosition, hits + 1);
+                    var laserLeft = new Coordinate(nextPosition.x()-1, nextPosition.y());
+                    var laserRight = new Coordinate(nextPosition.x()+1, nextPosition.y());
+                    lasersToRun.add(laserLeft);
+                    lasersToRun.add(laserRight);
+                }
+
+                laserPosition = nextPosition;
+            }
+        }
+        return splitterHits.values().stream().filter( v -> v > 0 ).count();
     }
 
     public MapSymbol getItemAt(int x, int y) {
@@ -68,4 +105,5 @@ class TachyonBeamTracer {
 
     private Map<Coordinate, MapSymbol> tachyonBeamMap = new HashMap<>();
     private List<Coordinate> startingPositions = new ArrayList<>();
+    private Map<Coordinate, Integer> splitterHits = new HashMap<>();
 }

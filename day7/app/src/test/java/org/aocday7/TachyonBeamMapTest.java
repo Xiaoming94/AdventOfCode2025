@@ -39,4 +39,17 @@ class TachyonBeamMapTest {
         assertEquals(MapSymbol.DOT, myBeamTracer.getItemAt(0, 0));
         assertEquals(MapSymbol.DOT, myBeamTracer.getItemAt(1, 1));
     }
+
+    @Test
+    void testSingleSplit() {
+        final String input = """
+                .S.
+                ...
+                .^.
+                ...
+                """;
+
+        var splits = Solution.solveProblem1(input);
+        assertEquals(1, splits);
+    }
 }
