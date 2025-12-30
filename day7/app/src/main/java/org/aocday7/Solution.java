@@ -69,10 +69,6 @@ class TachyonBeamTracer {
                             startingPositions.add(coordinate);
                         }
 
-                        if (parsedMapSymbol == MapSymbol.SPLIT) {
-                            splitterHits.put(coordinate, 0);
-                        }
-
                         this.tachyonBeamMap.put(coordinate, parsedMapSymbol);
                     });
             });
@@ -87,6 +83,7 @@ class TachyonBeamTracer {
         Queue<Coordinate> lasersToRun = new ArrayDeque<>();
         lasersToRun.addAll(startingPositions);
         Set<Coordinate> visitedStartingNodes = new HashSet<>();
+        Set<Coordinate> hittedSplitters = new HashSet<>();
         while(!lasersToRun.isEmpty()) {
             var laserPosition = lasersToRun.remove();
             while(tachyonBeamMap.containsKey(laserPosition) &&
@@ -95,8 +92,7 @@ class TachyonBeamTracer {
                 // Look ahead
                 var nextSymbol = tachyonBeamMap.get(nextPosition);
                 if (nextSymbol == MapSymbol.SPLIT) {
-                    var hits = splitterHits.get(nextPosition);
-                    splitterHits.replace(nextPosition, hits + 1);
+                    hittedSplitters.add(nextPosition);
                     var laserLeft = new Coordinate(nextPosition.x()-1, nextPosition.y());
                     if (visitedStartingNodes.add(laserLeft)) {
                         lasersToRun.add(laserLeft);
@@ -111,7 +107,7 @@ class TachyonBeamTracer {
                 laserPosition = nextPosition;
             }
         }
-        return splitterHits.values().stream().filter( v -> v > 0 ).count();
+        return hittedSplitters.size();
     }
 
     public MapSymbol getItemAt(int x, int y) {
@@ -125,5 +121,4 @@ class TachyonBeamTracer {
 
     private Map<Coordinate, MapSymbol> tachyonBeamMap = new HashMap<>();
     private List<Coordinate> startingPositions = new ArrayList<>();
-    private Map<Coordinate, Integer> splitterHits = new HashMap<>();
 }
