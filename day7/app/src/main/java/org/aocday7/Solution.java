@@ -32,6 +32,12 @@ public class Solution {
         tachyonBeamTracer.createTachyonMap(input);
         return tachyonBeamTracer.calcTotalSplits();
     }
+
+    public static long solveProblem2(String input) {
+        var tachyonBeamTracer = new TachyonBeamTracer();
+        tachyonBeamTracer.createTachyonMap(input);
+        return tachyonBeamTracer.calcQuantumBeamTimelines();
+    }
 }
 
 record Coordinate(int x, int y) {}
@@ -108,6 +114,10 @@ class TachyonBeamTracer {
             }
         }
         return hittedSplitters.size();
+    }
+
+    public long calcQuantumBeamTimelines() {
+        return 0;
     }
 
     public MapSymbol getItemAt(int x, int y) {

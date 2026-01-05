@@ -33,4 +33,10 @@ class AocTest {
         var result = Solution.solveProblem1(EXAMPLE_INPUT);
         assertEquals(21, result);
     }
+
+    @Test
+    void problem2Solution() {
+        var result = Solution.solveProblem2(EXAMPLE_INPUT);
+        assertEquals(40, result);
+    }
 }
