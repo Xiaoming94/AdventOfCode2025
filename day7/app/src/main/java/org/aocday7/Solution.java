@@ -82,11 +82,11 @@ class TachyonBeamTracer {
         return new Coordinate(currentLaserPos.x(), currentLaserPos.y() + 1);
     }
 
-    private long runBeamSimulation() {
+    private Map<Coordinate, Integer> runBeamSimulation() {
         Queue<Coordinate> lasersToRun = new ArrayDeque<>();
         lasersToRun.addAll(startingPositions);
         Set<Coordinate> visitedStartingNodes = new HashSet<>();
-        Set<Coordinate> hittedSplitters = new HashSet<>();
+        Map<Coordinate, Integer> hittedSplitters = new HashMap<>();
         while(!lasersToRun.isEmpty()) {
             var laserPosition = lasersToRun.remove();
             while(tachyonBeamMap.containsKey(laserPosition) &&
@@ -95,7 +95,7 @@ class TachyonBeamTracer {
                 // Look ahead
                 var nextSymbol = tachyonBeamMap.get(nextPosition);
                 if (nextSymbol == MapSymbol.SPLIT) {
-                    hittedSplitters.add(nextPosition);
+                    hittedSplitters.put(nextPosition, 1);
                     var laserLeft = new Coordinate(nextPosition.x()-1, nextPosition.y());
                     if (visitedStartingNodes.add(laserLeft)) {
                         lasersToRun.add(laserLeft);
@@ -110,7 +110,7 @@ class TachyonBeamTracer {
                 laserPosition = nextPosition;
             }
         }
-        return hittedSplitters.size();
+        return hittedSplitters;
 
     }
 
@@ -137,11 +137,13 @@ class TachyonBeamTracer {
     }
 
     public long calcTotalSplits() {
-        return runBeamSimulation();
+        var result = runBeamSimulation();
+        return result.size();
     }
 
     public long calcQuantumBeamTimelines() {
-        return 0;
+        var result = runBeamSimulation();
+        return result.values().stream().reduce(1, (lhs, rhs) -> lhs + rhs);
     }
 
     public MapSymbol getItemAt(int x, int y) {
