@@ -9,6 +9,7 @@ package org.aocday7;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,24 @@ public class Solution {
 
 record Coordinate(int x, int y) {}
 
+class CoordComparator implements Comparator<Coordinate>
+{
+    public int compare(Coordinate lhs, Coordinate rhs) {
+        if (lhs.equals(rhs)) {
+            return EQUALS;
+        }
+        return lhs.y() >= rhs.y() ? GREATER : LESS;
+    }
+
+    public boolean equals(Object obj) {
+        return obj.equals(this);
+    }
+
+    private static final int LESS = -1;
+    private static final int EQUALS = 0;
+    private static final int GREATER = 1;
+}
+
 enum MapSymbol {
     SPLIT,
     DOT,
@@ -59,33 +78,11 @@ class TachyonBeamTracer {
         throw new IllegalStateException(String.format("Invalid input character %s", inputChar));
     }
 
-    public void createTachyonMap(String input) {
-        var inputLinesArr = input
-            .lines()
-            .toArray(String[]::new);
-
-        IntStream.range(0, inputLinesArr.length)
-            .forEach(i -> {
-                var line = inputLinesArr[i].toCharArray();
-                IntStream.range(0, line.length)
-                    .forEach(j -> {
-                        var parsedMapSymbol = toMapSymbol(line[j]);
-                        var coordinate = new Coordinate(j, i);
-                        if ( parsedMapSymbol == MapSymbol.START ) {
-                            startingPositions.add(coordinate);
-                        }
-
-                        this.tachyonBeamMap.put(coordinate, parsedMapSymbol);
-                    });
-            });
-
-    }
-
     private Coordinate moveLaser(Coordinate currentLaserPos) {
         return new Coordinate(currentLaserPos.x(), currentLaserPos.y() + 1);
     }
 
-    public long calcTotalSplits() {
+    private long runBeamSimulation() {
         Queue<Coordinate> lasersToRun = new ArrayDeque<>();
         lasersToRun.addAll(startingPositions);
         Set<Coordinate> visitedStartingNodes = new HashSet<>();
@@ -114,6 +111,33 @@ class TachyonBeamTracer {
             }
         }
         return hittedSplitters.size();
+
+    }
+
+    public void createTachyonMap(String input) {
+        var inputLinesArr = input
+            .lines()
+            .toArray(String[]::new);
+
+        IntStream.range(0, inputLinesArr.length)
+            .forEach(i -> {
+                var line = inputLinesArr[i].toCharArray();
+                IntStream.range(0, line.length)
+                    .forEach(j -> {
+                        var parsedMapSymbol = toMapSymbol(line[j]);
+                        var coordinate = new Coordinate(j, i);
+                        if ( parsedMapSymbol == MapSymbol.START ) {
+                            startingPositions.add(coordinate);
+                        }
+
+                        this.tachyonBeamMap.put(coordinate, parsedMapSymbol);
+                    });
+            });
+
+    }
+
+    public long calcTotalSplits() {
+        return runBeamSimulation();
     }
 
     public long calcQuantumBeamTimelines() {
