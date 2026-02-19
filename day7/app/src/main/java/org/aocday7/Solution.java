@@ -7,6 +7,7 @@
 
 package org.aocday7;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -34,7 +35,7 @@ public class Solution {
         return tachyonBeamTracer.calcTotalSplits();
     }
 
-    public static long solveProblem2(String input) {
+    public static String solveProblem2(String input) {
         var tachyonBeamTracer = new TachyonBeamTracer();
         tachyonBeamTracer.createTachyonMap(input);
         return tachyonBeamTracer.calcQuantumBeamTimelines();
@@ -71,7 +72,7 @@ class TachyonBeamTracer {
 
     }
 
-    private Map<Coordinate, Integer> runBeamSimulation() {
+    private Map<Coordinate, BigInteger> runBeamSimulation() {
         Queue<Coordinate> splitters = new PriorityQueue<>(Comparator.comparingInt(Coordinate::y));
         var nodesInMap = this.tachyonBeamMap.keySet();
         splitters.addAll(
@@ -84,7 +85,7 @@ class TachyonBeamTracer {
                 .toList()
         );
 
-        Map<Coordinate, Integer> hittedSplitters = new HashMap<>();
+        Map<Coordinate, BigInteger> hittedSplitters = new HashMap<>();
 
         while(!splitters.isEmpty()) {
             var current = splitters.poll();
@@ -92,9 +93,9 @@ class TachyonBeamTracer {
             if (tachyonBeamMap.get(current) == MapSymbol.START) {
                 propagateLaser(current).ifPresent(
                     coord -> {
-                        var hits = 1;
+                        var hits = BigInteger.ONE;
                         if (hittedSplitters.containsKey(coord)){
-                            hits += hittedSplitters.get(coord);
+                            hits = hits.add(hittedSplitters.get(coord));
                         }
                         hittedSplitters.put(coord, hits);
                     }
@@ -115,7 +116,7 @@ class TachyonBeamTracer {
                         laser -> propagateLaser(laser)
                         .ifPresent(
                             coord -> {
-                                var hits = hittedSplitters.getOrDefault(coord, 0) + timeLinesOnBranch;
+                                var hits = hittedSplitters.getOrDefault(coord, BigInteger.ZERO).add(timeLinesOnBranch);
                                 hittedSplitters.put(coord, hits);
                             }
                         )
@@ -153,9 +154,13 @@ class TachyonBeamTracer {
         return result.size();
     }
 
-    public long calcQuantumBeamTimelines() {
+    public String calcQuantumBeamTimelines() {
         var result = runBeamSimulation();
-        return result.values().stream().reduce(1, (lhs, rhs) -> lhs + rhs);
+        return result
+            .values()
+            .stream()
+            .reduce(BigInteger.ONE, (lhs, rhs) -> lhs.add(rhs))
+            .toString();
     }
 
     public MapSymbol getItemAt(int x, int y) {

@@ -16,7 +16,7 @@ class QuantumTimelineTest {
                 """;
 
         var result = Solution.solveProblem2(input);
-        assertEquals(2, result);
+        assertEquals("2", result);
     }
 
     @Test
@@ -31,7 +31,7 @@ class QuantumTimelineTest {
                 """;
 
         var result = Solution.solveProblem2(input);
-        assertEquals(4, result);
+        assertEquals("4", result);
     }
 
     @Test
@@ -48,6 +48,6 @@ class QuantumTimelineTest {
                 """;
 
         var result = Solution.solveProblem2(input);
-        assertEquals(6, result);
+        assertEquals("6", result);
     }
 }

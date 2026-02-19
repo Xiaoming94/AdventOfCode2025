@@ -37,6 +37,6 @@ class AocTest {
     @Test
     void problem2Solution() {
         var result = Solution.solveProblem2(EXAMPLE_INPUT);
-        assertEquals(40, result);
+        assertEquals("40", result);
     }
 }
