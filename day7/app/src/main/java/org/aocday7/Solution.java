@@ -1,10 +1,3 @@
-/**
- * Class for the solution of Advent of Code day7;
- *
- * In general, this solution uses an internal hashmap to store mapData
- * And then using a queue to keep track of what lasers are still traversing.
- */
-
 package org.aocday7;
 
 import java.math.BigInteger;
@@ -19,12 +12,18 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.stream.IntStream;
 
+/**
+ * <h1>Solution for Advent of Code 2025 day 7.</h>
+ *
+ * Problem description found at https://adventofcode.com/2025/day/7.
+ *
+ * The backbone of the solution is a top down BFS algorithm
+ * with some tracking done to make sure that one simulation works
+ * for both problems.
+ */
 public class Solution {
     /**
      * Function for solving problem 1
-     *
-     * Uses a simple laser simulation to find the numbers of splits according to the
-     * problem specification of https://adventofcode.com/2025/day/7
      *
      * @param input Multiline string representation of the map
      * @return solution for problem1, i.e. the number of unique splits
@@ -35,6 +34,12 @@ public class Solution {
         return tachyonBeamTracer.calcTotalSplits();
     }
 
+    /**
+     * Function for solving problem 2
+     *
+     * @param input Multiline string representation of the map
+     * @return solution for problem1, i.e. the number of unique splits
+     */
     public static String solveProblem2(String input) {
         var tachyonBeamTracer = new TachyonBeamTracer();
         tachyonBeamTracer.createTachyonMap(input);
