@@ -17,5 +17,6 @@ public class Main {
         var input = readInput();
         System.out.println(String.format("input is: %s", input));
         System.out.println(String.format("Solution for problem 1: %d", Solution.solveProblem1(input)));
+        System.out.println(String.format("Solution for problem 2: %s", Solution.solveProblem2(input)));
     }
 }
