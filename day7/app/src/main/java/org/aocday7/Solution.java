@@ -7,15 +7,15 @@
 
 package org.aocday7;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 public class Solution {
@@ -43,24 +43,6 @@ public class Solution {
 
 record Coordinate(int x, int y) {}
 
-class CoordComparator implements Comparator<Coordinate>
-{
-    public int compare(Coordinate lhs, Coordinate rhs) {
-        if (lhs.equals(rhs)) {
-            return EQUALS;
-        }
-        return lhs.y() >= rhs.y() ? GREATER : LESS;
-    }
-
-    public boolean equals(Object obj) {
-        return obj.equals(this);
-    }
-
-    private static final int LESS = -1;
-    private static final int EQUALS = 0;
-    private static final int GREATER = 1;
-}
-
 enum MapSymbol {
     SPLIT,
     DOT,
@@ -78,40 +60,70 @@ class TachyonBeamTracer {
         throw new IllegalStateException(String.format("Invalid input character %s", inputChar));
     }
 
-    private Coordinate moveLaser(Coordinate currentLaserPos) {
-        return new Coordinate(currentLaserPos.x(), currentLaserPos.y() + 1);
+    private Optional<Coordinate> propagateLaser(Coordinate pos) {
+        var nodesInMap = this.tachyonBeamMap.keySet();
+        return nodesInMap
+            .stream()
+            .filter(coord -> this.tachyonBeamMap.get(coord) == MapSymbol.SPLIT )
+            .filter(coord -> coord.x() == pos.x() && coord.y() > pos.y())
+            .sorted(Comparator.comparingInt(Coordinate::y))
+            .findFirst();
+
     }
 
     private Map<Coordinate, Integer> runBeamSimulation() {
-        Queue<Coordinate> lasersToRun = new ArrayDeque<>();
-        lasersToRun.addAll(startingPositions);
-        Set<Coordinate> visitedStartingNodes = new HashSet<>();
+        Queue<Coordinate> splitters = new PriorityQueue<>(Comparator.comparingInt(Coordinate::y));
+        var nodesInMap = this.tachyonBeamMap.keySet();
+        splitters.addAll(
+            nodesInMap
+                .stream()
+                .filter(coord -> {
+                    var mapData = this.tachyonBeamMap.get(coord);
+                    return mapData == MapSymbol.SPLIT || mapData == MapSymbol.START;
+                })
+                .toList()
+        );
+
         Map<Coordinate, Integer> hittedSplitters = new HashMap<>();
-        while(!lasersToRun.isEmpty()) {
-            var laserPosition = lasersToRun.remove();
-            while(tachyonBeamMap.containsKey(laserPosition) &&
-                    tachyonBeamMap.get(laserPosition) != MapSymbol.SPLIT) {
-                var nextPosition = moveLaser(laserPosition);
-                // Look ahead
-                var nextSymbol = tachyonBeamMap.get(nextPosition);
-                if (nextSymbol == MapSymbol.SPLIT) {
-                    hittedSplitters.put(nextPosition, 1);
-                    var laserLeft = new Coordinate(nextPosition.x()-1, nextPosition.y());
-                    if (visitedStartingNodes.add(laserLeft)) {
-                        lasersToRun.add(laserLeft);
-                    }
 
-                    var laserRight = new Coordinate(nextPosition.x()+1, nextPosition.y());
-                    if (visitedStartingNodes.add(laserRight)) {
-                        lasersToRun.add(laserRight);
+        while(!splitters.isEmpty()) {
+            var current = splitters.poll();
+            // Starting positions
+            if (tachyonBeamMap.get(current) == MapSymbol.START) {
+                propagateLaser(current).ifPresent(
+                    coord -> {
+                        var hits = 1;
+                        if (hittedSplitters.containsKey(coord)){
+                            hits += hittedSplitters.get(coord);
+                        }
+                        hittedSplitters.put(coord, hits);
                     }
+                );
+            }
+
+            //Splitters
+            if (tachyonBeamMap.get(current) == MapSymbol.SPLIT) {
+                if (!hittedSplitters.containsKey(current)) {
+                    continue;
                 }
-
-                laserPosition = nextPosition;
+                var timeLinesOnBranch = hittedSplitters.get(current);
+                var laserLeft = new Coordinate(current.x() - 1, current.y());
+                var laserRight = new Coordinate(current.x() + 1, current.y());
+                Arrays
+                    .stream(new Coordinate[]{laserLeft, laserRight})
+                    .forEach(
+                        laser -> propagateLaser(laser)
+                        .ifPresent(
+                            coord -> {
+                                var hits = hittedSplitters.getOrDefault(coord, 0) + timeLinesOnBranch;
+                                hittedSplitters.put(coord, hits);
+                            }
+                        )
+                    );
             }
         }
-        return hittedSplitters;
 
+        return hittedSplitters;
     }
 
     public void createTachyonMap(String input) {
