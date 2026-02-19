@@ -30,3 +30,4 @@ Each `dayN/` directory also includes a small readme detailing my thought process
 | 4 | java |
 | 5 | python |
 | 6 | rust |
+| 7 | java |
