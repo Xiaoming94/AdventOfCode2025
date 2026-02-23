@@ -3,6 +3,8 @@
 
 #include <print>
 
-int main() { std::println("Hello World"); }
+int main() {
+  std::println("Hello World");
+}
 
 #endif
