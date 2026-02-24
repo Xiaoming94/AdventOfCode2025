@@ -4,6 +4,7 @@
 #include <charconv>
 #include <cmath>
 #include <optional>
+#include <print>
 #include <queue>
 #include <ranges>
 #include <vector>
@@ -26,9 +27,10 @@ namespace solution {
           return std::nullopt;
         }
         auto coordinates
-            = std::views::split(nodeStr, ",")
+            = std::views::split(nodeStr, ',')
               | std::views::transform([](auto&& range) {
                   std::string_view strView(&*range.begin(), std::ranges::distance(range));
+                  std::println("parsing: {}", strView);
                   std::uint32_t coord;
                   std::from_chars(strView.data(), strView.data() + strView.size(), coord);
                   return coord;
@@ -76,7 +78,7 @@ namespace solution {
 
     using EdgeQueue_t = std::priority_queue<Edge>;
     EdgeQueue_t parseTextCreateEdgeQueue(std::string_view nodeList) {
-      auto nodes = std::views::split(nodeList, "\n")
+      auto nodes = std::views::split(nodeList, '\n')
                    | std::views::transform([](auto&& range) {
                        return std::string_view(&*range.begin(), std::ranges::distance(range));
                      })
@@ -98,6 +100,7 @@ namespace solution {
 
   }  // namespace internal
   std::uint32_t solveProblem1(std::string_view input, std::uint32_t nWires) {
+    std::println("input is:\n {}", input);
     auto edges = internal::parseTextCreateEdgeQueue(input);
     return 0;
   }
