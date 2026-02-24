@@ -22,7 +22,7 @@ PenaltyBreakComment: 300
 
 # Allow breaking after assignment for pipelines
 BreakBeforeBraces: Attach
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 
@@ -55,4 +55,10 @@ AllowShortLambdasOnASingleLine: Inline
 # Prevent collapsing long statements
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
+
+# Constructor formatting
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+ConstructorInitializerIndentWidth: 2
+AllowAllConstructorInitializersOnNextLine: false
 
