@@ -2,7 +2,7 @@
 
 #include "solution.h"
 
-constexpr auto exampleInput{
+constexpr auto EXAMPLE_INPUT{
     "162,817,812\n"
     "57,618,57\n"
     "906,360,560\n"
@@ -25,6 +25,16 @@ constexpr auto exampleInput{
     "425,690,689"};
 
 TEST(Aoc2025day8Test, problem1Solution) {
-  const auto result = solution::solveProblem1(exampleInput);
+  const auto result = solution::solveProblem1(EXAMPLE_INPUT, 10u);
   EXPECT_EQ(40u, result);
+}
+
+TEST(Problem1Test, findSimpleCircuit) {
+  constexpr auto input{"4,2,5\n5,1,3"};
+  EXPECT_EQ(2u, solution::solveProblem1(input, 1));
+}
+
+TEST(Problem1Test, findCircuitOfSize3) {
+  constexpr auto input{"4,2,5\n5,1,3\n3,2,5"};
+  EXPECT_EQ(3u, solution::solveProblem1(input, 2));
 }
