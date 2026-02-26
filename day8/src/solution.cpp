@@ -15,7 +15,7 @@ namespace solution {
   namespace internal {
     class Node {
      public:
-      using Ptr_sp = std::shared_ptr<Node>;
+      using Ptr_sp = std::unique_ptr<Node>;
       using PtrVec_t = std::vector<Ptr_sp>;
       Node(std::uint32_t x, std::uint32_t y, std::uint32_t z)
         : m_x(x)
@@ -23,19 +23,19 @@ namespace solution {
         , m_z(z) {}
 
       static auto fromNodeData(std::vector<std::uint32_t>&& nodeData) -> Ptr_sp {
-        return std::make_shared<Node>(nodeData[0], nodeData[1], nodeData[2]);
+        return std::make_unique<Node>(nodeData[0], nodeData[1], nodeData[2]);
       }
 
-      std::uint32_t getX() const { return m_x; }
+      std::int32_t getX() const { return m_x; }
 
-      std::uint32_t getY() const { return m_y; }
+      std::int32_t getY() const { return m_y; }
 
-      std::uint32_t getZ() const { return m_z; }
+      std::int32_t getZ() const { return m_z; }
 
       auto calcDistanceTo(const Node& other) const {
-        std::uint64_t dx = m_x - other.getX();
-        std::uint64_t dy = m_y - other.getY();
-        std::uint64_t dz = m_z - other.getZ();
+        std::int64_t dx = m_x - other.getX();
+        std::int64_t dy = m_y - other.getY();
+        std::int64_t dz = m_z - other.getZ();
 
         // Distance formula
         return (dx * dx) + (dy * dy) + (dz * dz);
@@ -48,16 +48,16 @@ namespace solution {
       auto operator<=>(const Node&) const = default;
 
      private:
-      std::uint32_t m_x;
-      std::uint32_t m_y;
-      std::uint32_t m_z;
+      std::int32_t m_x;
+      std::int32_t m_y;
+      std::int32_t m_z;
       bool m_used{false};
     };
 
     struct Edge {
-      Node::Ptr_sp node1;
-      Node::Ptr_sp node2;
-      std::uint64_t length;
+      std::uint32_t node1Id;
+      std::uint32_t node2Id;
+      std::int64_t length;
 
       auto operator<=>(const Edge& other) const { return length <=> other.length; }
     };
@@ -78,7 +78,13 @@ namespace solution {
     }
 
     using EdgeQueue_t = std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>>;
-    EdgeQueue_t parseTextCreateEdgeQueue(std::string_view nodeList) {
+
+    struct ProblemData {
+      Node::PtrVec_t nodes;
+      EdgeQueue_t edges;
+    };
+
+    ProblemData createProblemDataFrom(std::string_view nodeList) {
       auto nodeData = cviews::split(nodeList, '\n')
                       | cviews::transform([](auto&& data) { return parseNodeData(data); })
                       | cviews::transform(Node::fromNodeData)
@@ -87,19 +93,23 @@ namespace solution {
       EdgeQueue_t edges;
       for (size_t i : cviews::iota(0u, nodeData.size())) {
         for (size_t j : cviews::iota(i + 1, nodeData.size())) {
-          edges.push(Edge{.node1 = nodeData.at(i),
-                          .node2 = nodeData.at(j),
-                          .length = nodeData[i]->calcDistanceTo(*nodeData[j])});
+          auto& node1 = nodeData[i];
+          auto& node2 = nodeData[j];
+          auto length = node1->calcDistanceTo(*node2);
+          edges.push(Edge{.node1Id = static_cast<uint32_t>(i),
+                          .node1Id = static_cast<uint32_t>(j),
+                          .length = length});
         }
       }
 
-      return edges;
+      return ProblemData{.nodes = std::move(nodeData), .edges = std::move(edges)};
     }
 
   }  // namespace internal
+
   std::uint32_t solveProblem1(std::string_view input, std::uint32_t nWires) {
     std::println("input is:\n{}", input);
-    auto edges = internal::parseTextCreateEdgeQueue(input);
+    auto problemData = internal::createProblemDataFrom(input);
     return 0;
   }
 }  // namespace solution
