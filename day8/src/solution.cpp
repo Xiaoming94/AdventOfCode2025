@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <memory>
 #include <print>
 #include <queue>
@@ -15,14 +16,14 @@ namespace solution {
   namespace internal {
     class Node {
      public:
-      using Ptr_sp = std::unique_ptr<Node>;
-      using PtrVec_t = std::vector<Ptr_sp>;
+      using Ptr_up = std::unique_ptr<Node>;
+      using PtrVec_t = std::vector<Ptr_up>;
       Node(std::uint32_t x, std::uint32_t y, std::uint32_t z)
         : m_x(x)
         , m_y(y)
         , m_z(z) {}
 
-      static auto fromNodeData(std::vector<std::uint32_t>&& nodeData) -> Ptr_sp {
+      static auto fromNodeData(std::vector<std::uint32_t>&& nodeData) -> Ptr_up {
         return std::make_unique<Node>(nodeData[0], nodeData[1], nodeData[2]);
       }
 
@@ -55,11 +56,12 @@ namespace solution {
     };
 
     struct Edge {
-      std::uint32_t node1Id;
-      std::uint32_t node2Id;
+      std::size_t node1Id;
+      std::size_t node2Id;
       std::int64_t length;
 
       auto operator<=>(const Edge& other) const { return length <=> other.length; }
+      using Vec_t = std::vector<Edge>;
     };
 
     std::vector<std::uint32_t> parseNodeData(auto&& data) {
@@ -77,39 +79,58 @@ namespace solution {
       return nodeData;
     }
 
-    using EdgeQueue_t = std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>>;
-
     struct ProblemData {
       Node::PtrVec_t nodes;
-      EdgeQueue_t edges;
+      Edge::Vec_t edges;
     };
 
-    ProblemData createProblemDataFrom(std::string_view nodeList) {
+    ProblemData createProblemDataFrom(std::string_view nodeList, std::uint32_t nWires) {
       auto nodeData = cviews::split(nodeList, '\n')
                       | cviews::transform([](auto&& data) { return parseNodeData(data); })
                       | cviews::transform(Node::fromNodeData)
                       | cranges::to<Node::PtrVec_t>();
 
-      EdgeQueue_t edges;
+      std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> edgesQueue;
       for (size_t i : cviews::iota(0u, nodeData.size())) {
         for (size_t j : cviews::iota(i + 1, nodeData.size())) {
           auto& node1 = nodeData[i];
           auto& node2 = nodeData[j];
           auto length = node1->calcDistanceTo(*node2);
-          edges.push(Edge{.node1Id = static_cast<uint32_t>(i),
-                          .node1Id = static_cast<uint32_t>(j),
-                          .length = length});
+          edgesQueue.push(Edge{.node1Id = i, .node2Id = j, .length = length});
         }
       }
 
+      Edge::Vec_t edges;
+      while (not edgesQueue.empty() && nWires > 0) {
+        const auto& edge = edgesQueue.top();
+        edges.emplace_back(edge);
+        nodeData[edge.node1Id]->use();
+        nodeData[edge.node2Id]->use();
+        edgesQueue.pop();
+        nWires -= 1;
+      }
+
+      // Freeing unused nodes
+      for (auto&& node : nodeData | cviews::filter(std::not_fn(&Node::isUsed))) {
+        node.reset();
+      }
+
       return ProblemData{.nodes = std::move(nodeData), .edges = std::move(edges)};
+    }
+    class ClusterFinder {
+     public:
+      ClusterFinder() = default;
+
+     private:
+      std::
     }
 
   }  // namespace internal
 
   std::uint32_t solveProblem1(std::string_view input, std::uint32_t nWires) {
     std::println("input is:\n{}", input);
-    auto problemData = internal::createProblemDataFrom(input);
+    auto [nodes, edges] = internal::createProblemDataFrom(input, nWires);
+
     return 0;
   }
 }  // namespace solution
