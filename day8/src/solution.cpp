@@ -7,12 +7,18 @@
 #include <print>
 #include <queue>
 #include <ranges>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace solution {
   constexpr auto DIMENSIONS{3u};
   namespace cviews = std::views;
   namespace cranges = std::ranges;
+
+  using id_t = size_t;
+  using Circuits_t = std::shared_ptr<std::unordered_set<id_t>>;
+
   namespace internal {
     class Node {
      public:
@@ -42,9 +48,9 @@ namespace solution {
         return (dx * dx) + (dy * dy) + (dz * dz);
       }
 
-      void use() { m_used = true; }
+      //     void use() { m_used = true; }
 
-      bool isUsed() const { return m_used; }
+      //     bool isUsed() const { return m_used; }
 
       auto operator<=>(const Node&) const = default;
 
@@ -52,12 +58,12 @@ namespace solution {
       std::int32_t m_x;
       std::int32_t m_y;
       std::int32_t m_z;
-      bool m_used{false};
+      //     bool m_used{false};
     };
 
     struct Edge {
-      std::size_t node1Id;
-      std::size_t node2Id;
+      id_t node1Id;
+      id_t node2Id;
       std::int64_t length;
 
       auto operator<=>(const Edge& other) const { return length <=> other.length; }
@@ -79,20 +85,20 @@ namespace solution {
       return nodeData;
     }
 
-    struct ProblemData {
-      Node::PtrVec_t nodes;
-      Edge::Vec_t edges;
-    };
+    //    struct ProblemData {
+    //      Node::PtrVec_t nodes;
+    //      Edge::Vec_t edges;
+    //    };
 
-    ProblemData createProblemDataFrom(std::string_view nodeList, std::uint32_t nWires) {
+    Edge::Vec_t createProblemDataFrom(std::string_view nodeList, std::uint32_t nWires) {
       auto nodeData = cviews::split(nodeList, '\n')
                       | cviews::transform([](auto&& data) { return parseNodeData(data); })
                       | cviews::transform(Node::fromNodeData)
                       | cranges::to<Node::PtrVec_t>();
 
       std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> edgesQueue;
-      for (size_t i : cviews::iota(0u, nodeData.size())) {
-        for (size_t j : cviews::iota(i + 1, nodeData.size())) {
+      for (id_t i : cviews::iota(0u, nodeData.size())) {
+        for (id_t j : cviews::iota(i + 1, nodeData.size())) {
           auto& node1 = nodeData[i];
           auto& node2 = nodeData[j];
           auto length = node1->calcDistanceTo(*node2);
@@ -104,33 +110,58 @@ namespace solution {
       while (not edgesQueue.empty() && nWires > 0) {
         const auto& edge = edgesQueue.top();
         edges.emplace_back(edge);
-        nodeData[edge.node1Id]->use();
-        nodeData[edge.node2Id]->use();
+        //       nodeData[edge.node1Id]->use();
+        //       nodeData[edge.node2Id]->use();
         edgesQueue.pop();
         nWires -= 1;
       }
 
       // Freeing unused nodes
-      for (auto&& node : nodeData | cviews::filter(std::not_fn(&Node::isUsed))) {
-        node.reset();
-      }
 
-      return ProblemData{.nodes = std::move(nodeData), .edges = std::move(edges)};
-    }
-    class ClusterFinder {
-     public:
-      ClusterFinder() = default;
-
-     private:
-      std::
+      return edges;
     }
 
   }  // namespace internal
 
   std::uint32_t solveProblem1(std::string_view input, std::uint32_t nWires) {
     std::println("input is:\n{}", input);
-    auto [nodes, edges] = internal::createProblemDataFrom(input, nWires);
+    auto edges = internal::createProblemDataFrom(input, nWires);
+    std::vector<Circuits_t> circuits;
+    std::unordered_map<id_t, Circuits_t> idToCircuits;
 
-    return 0;
+    for (const auto& [node1Id, node2Id, _] : edges) {
+      std::println("Currently on edge (id_1: {}, Id_2: {})", node1Id, node2Id);
+      if (idToCircuits.contains(node1Id)) {
+        if (idToCircuits.contains(node2Id)) {
+          idToCircuits[node1Id]->merge(*idToCircuits[node2Id]);
+          idToCircuits[node2Id].reset();
+        } else {
+          idToCircuits[node1Id]->insert(node2Id);
+        }
+        idToCircuits[node2Id] = idToCircuits[node1Id];
+      } else if (idToCircuits.contains(node1Id)) {
+        idToCircuits[node2Id]->insert(node1Id);
+        idToCircuits[node1Id] = idToCircuits[node2Id];
+      } else {
+        std::println("Constructing new circuit");
+        Circuits_t newCircuit = std::make_shared<std::unordered_set<id_t>>();
+        newCircuit->insert(node1Id);
+        newCircuit->insert(node2Id);
+        idToCircuits[node1Id] = newCircuit;
+        idToCircuits[node2Id] = newCircuit;
+        circuits.emplace_back(newCircuit);
+      }
+    }
+
+    return cranges::fold_left(circuits | cviews::filter([](auto&& circuit) {
+                                return circuit != nullptr;
+                              }) | cviews::transform([](auto&& circuit) {
+                                for (id_t id : *circuit) {
+                                  std::println("id: {}", id);
+                                }
+                                return circuit->size();
+                              }),
+                              1,
+                              std::multiplies{});
   }
 }  // namespace solution
