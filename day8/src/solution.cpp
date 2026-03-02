@@ -4,7 +4,6 @@
 #include <cassert>
 #include <functional>
 #include <memory>
-#include <print>
 #include <queue>
 #include <ranges>
 #include <unordered_map>
@@ -47,17 +46,12 @@ namespace solution {
         return (dx * dx) + (dy * dy) + (dz * dz);
       }
 
-      //     void use() { m_used = true; }
-
-      //     bool isUsed() const { return m_used; }
-
       auto operator<=>(const Node&) const = default;
 
      private:
       std::int32_t m_x;
       std::int32_t m_y;
       std::int32_t m_z;
-      //     bool m_used{false};
     };
 
     struct Edge {
@@ -84,11 +78,6 @@ namespace solution {
       return nodeData;
     }
 
-    //    struct ProblemData {
-    //      Node::PtrVec_t nodes;
-    //      Edge::Vec_t edges;
-    //    };
-
     Edge::Vec_t createProblemDataFrom(std::string_view nodeList, std::uint32_t nWires) {
       auto nodeData = cviews::split(nodeList, '\n')
                       | cviews::transform([](auto&& data) { return parseNodeData(data); })
@@ -109,13 +98,9 @@ namespace solution {
       while (not edgesQueue.empty() && nWires > 0) {
         const auto& edge = edgesQueue.top();
         edges.emplace_back(edge);
-        //       nodeData[edge.node1Id]->use();
-        //       nodeData[edge.node2Id]->use();
         edgesQueue.pop();
         nWires -= 1;
       }
-
-      // Freeing unused nodes
 
       return edges;
     }
@@ -146,14 +131,12 @@ namespace solution {
   }  // namespace internal
 
   std::uint32_t solveProblem1(std::string_view input, std::uint32_t nWires) {
-    std::println("input is:\n{}", input);
     auto edges = internal::createProblemDataFrom(input, nWires);
     using internal::Circuit;
     std::vector<Circuit::Ptr_t> circuits;
     std::unordered_map<id_t, Circuit::Ptr_t> idToCircuits;
 
     for (const auto& [node1Id, node2Id, _] : edges) {
-      std::println("Currently on edge (id_1: {}, Id_2: {})", node1Id, node2Id);
       auto node1InCircuit = idToCircuits.contains(node1Id);
       auto node2InCircuit = idToCircuits.contains(node2Id);
 
@@ -161,14 +144,15 @@ namespace solution {
       if (node1InCircuit and node2InCircuit) {
         auto circuit1 = idToCircuits[node1Id];
         auto circuit2 = idToCircuits[node2Id];
-
-        circuit1->merge(*circuit2);
-        auto it = std::find_if(circuits.begin(), circuits.end(), [&circuit2](auto&& circuit) {
-          return circuit->getId() == circuit2->getId();
-        });
-        circuits.erase(it);
-        circuit2.reset();
-        idToCircuits[node2Id] = circuit1;
+        if (circuit1 != circuit2) {
+          circuit1->merge(*circuit2);
+          auto it = std::find_if(circuits.begin(), circuits.end(), [&circuit2](auto&& circuit) {
+            return circuit->getId() == circuit2->getId();
+          });
+          circuits.erase(it);
+          circuit2.reset();
+          idToCircuits[node2Id] = circuit1;
+        }
 
       } else if (node1InCircuit) {
         idToCircuits[node1Id]->add(node2Id);
@@ -177,7 +161,6 @@ namespace solution {
         idToCircuits[node2Id]->add(node1Id);
         idToCircuits[node1Id] = idToCircuits[node2Id];
       } else {
-        std::println("Constructing new circuit");
         auto newCircuit = std::make_shared<Circuit>();
         newCircuit->add(node1Id);
         newCircuit->add(node2Id);
@@ -186,11 +169,11 @@ namespace solution {
         circuits.emplace_back(newCircuit);
       }
     }
+    cranges::sort(circuits, [](const auto& circuit1, const auto& circuit2) {
+      return circuit1->getNodes().size() > circuit2->getNodes().size();
+    });
 
-    return cranges::fold_left(circuits | cviews::transform([](auto&& circuit) {
-                                for (id_t id : circuit->getNodes()) {
-                                  std::println("id: {}", id);
-                                }
+    return cranges::fold_left(circuits | cviews::take(3) | cviews::transform([](auto&& circuit) {
                                 return circuit->getNodes().size();
                               }),
                               1,
