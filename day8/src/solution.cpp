@@ -17,7 +17,6 @@ namespace solution {
   namespace cranges = std::ranges;
 
   using id_t = size_t;
-  using Circuits_t = std::shared_ptr<std::unordered_set<id_t>>;
 
   namespace internal {
     class Node {
@@ -121,45 +120,78 @@ namespace solution {
       return edges;
     }
 
+    static std::uint32_t circuitIds{0};
+
+    class Circuit {
+     public:
+      using Ptr_t = std::shared_ptr<Circuit>;
+      Circuit()
+        : m_id(circuitIds++) {}
+
+      auto getId() const { return m_id; }
+
+      auto getNodes() { return m_nodes; }
+
+      void merge(Circuit& other) { m_nodes.merge(other.getNodes()); }
+
+      auto add(id_t newNodeId) { return m_nodes.insert(newNodeId); }
+
+      auto operator<=>(const Circuit& other) const { return m_id <=> other.getId(); }
+
+     private:
+      std::uint32_t m_id;
+      std::unordered_set<id_t> m_nodes;
+    };
+
   }  // namespace internal
 
   std::uint32_t solveProblem1(std::string_view input, std::uint32_t nWires) {
     std::println("input is:\n{}", input);
     auto edges = internal::createProblemDataFrom(input, nWires);
-    std::vector<Circuits_t> circuits;
-    std::unordered_map<id_t, Circuits_t> idToCircuits;
+    using internal::Circuit;
+    std::vector<Circuit::Ptr_t> circuits;
+    std::unordered_map<id_t, Circuit::Ptr_t> idToCircuits;
 
     for (const auto& [node1Id, node2Id, _] : edges) {
       std::println("Currently on edge (id_1: {}, Id_2: {})", node1Id, node2Id);
-      if (idToCircuits.contains(node1Id)) {
-        if (idToCircuits.contains(node2Id)) {
-          idToCircuits[node1Id]->merge(*idToCircuits[node2Id]);
-          idToCircuits[node2Id].reset();
-        } else {
-          idToCircuits[node1Id]->insert(node2Id);
-        }
+      auto node1InCircuit = idToCircuits.contains(node1Id);
+      auto node2InCircuit = idToCircuits.contains(node2Id);
+
+      // Merging two circuits
+      if (node1InCircuit and node2InCircuit) {
+        auto circuit1 = idToCircuits[node1Id];
+        auto circuit2 = idToCircuits[node2Id];
+
+        circuit1->merge(*circuit2);
+        auto it = std::find_if(circuits.begin(), circuits.end(), [&circuit2](auto&& circuit) {
+          return circuit->getId() == circuit2->getId();
+        });
+        circuits.erase(it);
+        circuit2.reset();
+        idToCircuits[node2Id] = circuit1;
+
+      } else if (node1InCircuit) {
+        idToCircuits[node1Id]->add(node2Id);
         idToCircuits[node2Id] = idToCircuits[node1Id];
-      } else if (idToCircuits.contains(node1Id)) {
-        idToCircuits[node2Id]->insert(node1Id);
+      } else if (node2InCircuit) {
+        idToCircuits[node2Id]->add(node1Id);
         idToCircuits[node1Id] = idToCircuits[node2Id];
       } else {
         std::println("Constructing new circuit");
-        Circuits_t newCircuit = std::make_shared<std::unordered_set<id_t>>();
-        newCircuit->insert(node1Id);
-        newCircuit->insert(node2Id);
+        auto newCircuit = std::make_shared<Circuit>();
+        newCircuit->add(node1Id);
+        newCircuit->add(node2Id);
         idToCircuits[node1Id] = newCircuit;
         idToCircuits[node2Id] = newCircuit;
         circuits.emplace_back(newCircuit);
       }
     }
 
-    return cranges::fold_left(circuits | cviews::filter([](auto&& circuit) {
-                                return circuit != nullptr;
-                              }) | cviews::transform([](auto&& circuit) {
-                                for (id_t id : *circuit) {
+    return cranges::fold_left(circuits | cviews::transform([](auto&& circuit) {
+                                for (id_t id : circuit->getNodes()) {
                                   std::println("id: {}", id);
                                 }
-                                return circuit->size();
+                                return circuit->getNodes().size();
                               }),
                               1,
                               std::multiplies{});

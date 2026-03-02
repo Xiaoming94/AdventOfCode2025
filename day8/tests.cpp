@@ -38,3 +38,8 @@ TEST(Problem1Test, findCircuitOfSize3) {
   constexpr auto input{"4,2,5\n5,1,3\n3,2,5"};
   EXPECT_EQ(3u, solution::solveProblem1(input, 2));
 }
+
+TEST(Problem1Test, findCircuitOfSize3With3Wires) {
+  constexpr auto input{"4,2,5\n5,1,3\n3,2,5"};
+  EXPECT_EQ(3u, solution::solveProblem1(input, 3));
+}
