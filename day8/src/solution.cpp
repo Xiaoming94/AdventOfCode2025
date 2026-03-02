@@ -28,7 +28,7 @@ namespace solution {
         , m_z(z) {}
 
       static auto fromNodeData(std::vector<std::uint32_t>&& nodeData) -> Ptr_up {
-        return std::make_unique<Node>(nodeData[0], nodeData[1], nodeData[2]);
+        return std::make_unique<Node>(nodeData.at(0), nodeData.at(1), nodeData.at(2));
       }
 
       std::int32_t getX() const { return m_x; }
@@ -87,8 +87,8 @@ namespace solution {
       std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> edgesQueue;
       for (id_t i : cviews::iota(0u, nodeData.size())) {
         for (id_t j : cviews::iota(i + 1, nodeData.size())) {
-          auto& node1 = nodeData[i];
-          auto& node2 = nodeData[j];
+          auto& node1 = nodeData.at(i);
+          auto& node2 = nodeData.at(j);
           auto length = node1->calcDistanceTo(*node2);
           edgesQueue.push(Edge{.node1Id = i, .node2Id = j, .length = length});
         }
@@ -145,13 +145,17 @@ namespace solution {
         auto circuit1 = idToCircuits[node1Id];
         auto circuit2 = idToCircuits[node2Id];
         if (circuit1 != circuit2) {
+          for (id_t nodeId : circuit2->getNodes()) {
+            idToCircuits[nodeId] = circuit1;
+          }
           circuit1->merge(*circuit2);
           auto it = std::find_if(circuits.begin(), circuits.end(), [&circuit2](auto&& circuit) {
             return circuit->getId() == circuit2->getId();
           });
-          circuits.erase(it);
+          if (it != circuits.end()) {
+            circuits.erase(it);
+          }
           circuit2.reset();
-          idToCircuits[node2Id] = circuit1;
         }
 
       } else if (node1InCircuit) {
