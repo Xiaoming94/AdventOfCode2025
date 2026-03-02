@@ -183,4 +183,8 @@ namespace solution {
                               1,
                               std::multiplies{});
   }
+
+  std::uint32_t solveProblem2(std::string_view /*input*/) {
+    return 0;
+  }
 }  // namespace solution

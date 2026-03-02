@@ -29,6 +29,11 @@ TEST(Aoc2025day8Test, problem1Solution) {
   EXPECT_EQ(40u, result);
 }
 
+TEST(Aoc2025day8Test, problem2Solution) {
+  const auto result = solution::solveProblem2(EXAMPLE_INPUT);
+  EXPECT_EQ(25272u, result);
+}
+
 TEST(Problem1Test, findSimpleCircuit) {
   constexpr auto input{"4,2,5\n5,1,3"};
   EXPECT_EQ(2u, solution::solveProblem1(input, 1));
