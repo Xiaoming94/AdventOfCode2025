@@ -24,6 +24,8 @@ exe = executable(
   include_directories : aoc_includes,
 )
 
+run_target('run', command: exe)
+
 # Test setup
 
 # Setup Google test

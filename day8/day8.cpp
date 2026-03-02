@@ -1,10 +1,21 @@
-#ifndef PROJECT_DAY8_MAIN
-#define PROJECT_DAY8_MAIN
+#define PROJECT_NAME "day8"
 
+#include <iostream>
 #include <print>
+#include <string>
+
+#include "solution.h"
 
 int main() {
-  std::println("Hello World");
-}
+  std::string input{""};
+  for (std::string line; std::getline(std::cin, line);) {
+    input += line + "\n";
+  }
 
-#endif
+  if (input.back() == '\n') {
+    input.pop_back();
+  }
+
+  std::println("Problem input is: \n{}", input);
+  std::println("Problem 1 solution is: {}", solution::solveProblem1(input, 1000u));
+}
