@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <queue>
 #include <ranges>
@@ -66,6 +67,7 @@ namespace solution {
     class Circuit {
      public:
       using Ptr_t = std::shared_ptr<Circuit>;
+      using Vec_t = std::vector<Ptr_t>;
       Circuit(id_t circuitId)
         : m_id(circuitId) {}
 
@@ -97,7 +99,7 @@ namespace solution {
       return nodeData;
     }
 
-    class GraphBuilder {
+    class Graph {
      public:
       using EdgesQueue_t = std::priority_queue<Edge, std::vector<Edge>, std::greater<>>;
       static auto buildNodes(std::string_view nodeList) -> Node::PtrVec_t {
@@ -106,7 +108,8 @@ namespace solution {
                | cviews::transform(Node::fromNodeData)
                | cranges::to<Node::PtrVec_t>();
       }
-      explicit GraphBuilder(std::string_view nodeList)
+
+      explicit Graph(std::string_view nodeList)
         : m_nodes(buildNodes(nodeList)) {}
 
       EdgesQueue_t createGraphEdges() {
@@ -125,58 +128,62 @@ namespace solution {
 
       Node& getNode(id_t id) const { return *m_nodes.at(id); }
 
-      id_t getNumberOfNodes() const { return m_nodes.size(); }
+      std::pair<Edge, Circuit::Vec_t> mergeCircuits(std::uint32_t nWires) {
+        auto edges = createGraphEdges();
+        auto [circuits, idToCircuits] = createCircuit();
+        auto finalEdge = internal::Edge{.node1Id = 1u, .node2Id = 1u, .length = 0u};
+        while (not edges.empty() && nWires > 0 && circuits.size() > 1u) {
+          finalEdge = edges.top();
+          auto circuit1 = idToCircuits.at(finalEdge.node1Id);
+          auto circuit2 = idToCircuits.at(finalEdge.node2Id);
 
-     private:
-      Node::PtrVec_t m_nodes;
-    };
+          if (circuit1 != circuit2) {
+            for (id_t nodeId : circuit2->getNodes()) {
+              idToCircuits[nodeId] = circuit1;
+            }
+            circuit1->merge(*circuit2);
+            auto it = std::find_if(circuits.begin(), circuits.end(), [&circuit2](auto&& circuit) {
+              return circuit->getId() == circuit2->getId();
+            });
+            if (it != circuits.end()) {
+              circuits.erase(it);
+            }
+            circuit2.reset();
+          }
+          nWires -= 1;
+          edges.pop();
+        }
 
-    auto createCircuits(id_t numberOfNodes)
-        -> std::pair<std::vector<Circuit::Ptr_t>, std::unordered_map<id_t, Circuit::Ptr_t>> {
-      auto circuits = cviews::iota(0u, numberOfNodes)
-                      | cviews::transform([](auto&& id) {
-                          auto circuit = std::make_shared<Circuit>(id);
-                          circuit->add(id);
-                          return circuit;
-                        })
-                      | cranges::to<std::vector<Circuit::Ptr_t>>();
-
-      std::unordered_map<id_t, Circuit::Ptr_t> idToCircuits;
-      for (auto&& [id, circuit] : circuits | cviews::enumerate) {
-        idToCircuits[id] = circuit;
+        return std::make_pair<>(finalEdge, circuits);
       }
 
-      return std::make_pair<>(circuits, idToCircuits);
-    }
+     private:
+      auto createCircuit()
+          -> std::pair<std::vector<Circuit::Ptr_t>, std::unordered_map<id_t, Circuit::Ptr_t>> {
+        auto circuits = cviews::iota(0u, m_nodes.size())
+                        | cviews::transform([](auto&& id) {
+                            auto circuit = std::make_shared<Circuit>(id);
+                            circuit->add(id);
+                            return circuit;
+                          })
+                        | cranges::to<std::vector<Circuit::Ptr_t>>();
+
+        std::unordered_map<id_t, Circuit::Ptr_t> idToCircuits;
+        for (auto&& [id, circuit] : circuits | cviews::enumerate) {
+          idToCircuits[id] = circuit;
+        }
+
+        return std::make_pair<>(circuits, idToCircuits);
+      }
+      Node::PtrVec_t m_nodes;
+    };
 
   }  // namespace internal
 
   std::uint32_t solveProblem1(std::string_view input, std::uint32_t nWires) {
-    internal::GraphBuilder graph(input);
+    internal::Graph graph(input);
     auto edges = graph.createGraphEdges();
-    auto [circuits, idToCircuits] = internal::createCircuits(graph.getNumberOfNodes());
-
-    while (not edges.empty() && nWires > 0) {
-      auto& [id1, id2, _] = edges.top();
-      auto circuit1 = idToCircuits.at(id1);
-      auto circuit2 = idToCircuits.at(id2);
-
-      if (circuit1 != circuit2) {
-        for (id_t nodeId : circuit2->getNodes()) {
-          idToCircuits[nodeId] = circuit1;
-        }
-        circuit1->merge(*circuit2);
-        auto it = std::find_if(circuits.begin(), circuits.end(), [&circuit2](auto&& circuit) {
-          return circuit->getId() == circuit2->getId();
-        });
-        if (it != circuits.end()) {
-          circuits.erase(it);
-        }
-        circuit2.reset();
-      }
-      nWires -= 1;
-      edges.pop();
-    }
+    auto circuits = graph.mergeCircuits(nWires).second;
 
     cranges::sort(circuits, [](const auto& circuit1, const auto& circuit2) {
       return circuit1->getNodes().size() > circuit2->getNodes().size();
@@ -190,31 +197,9 @@ namespace solution {
   }
 
   std::uint32_t solveProblem2(std::string_view input) {
-    internal::GraphBuilder graph(input);
+    internal::Graph graph(input);
     auto edges = graph.createGraphEdges();
-    auto [circuits, idToCircuits] = internal::createCircuits(graph.getNumberOfNodes());
-
-    auto finalEdge = internal::Edge{.node1Id = 1u, .node2Id = 1u, .length = 0u};
-    while (not edges.empty() && circuits.size() != 1u) {
-      finalEdge = edges.top();
-      auto circuit1 = idToCircuits.at(finalEdge.node1Id);
-      auto circuit2 = idToCircuits.at(finalEdge.node2Id);
-
-      if (circuit1 != circuit2) {
-        for (id_t nodeId : circuit2->getNodes()) {
-          idToCircuits[nodeId] = circuit1;
-        }
-        circuit1->merge(*circuit2);
-        auto it = std::find_if(circuits.begin(), circuits.end(), [&circuit2](auto&& circuit) {
-          return circuit->getId() == circuit2->getId();
-        });
-        if (it != circuits.end()) {
-          circuits.erase(it);
-        }
-        circuit2.reset();
-      }
-      edges.pop();
-    }
+    auto finalEdge = graph.mergeCircuits(std::numeric_limits<uint32_t>{}.max()).first;
 
     auto& node1 = graph.getNode(finalEdge.node1Id);
     auto& node2 = graph.getNode(finalEdge.node2Id);
