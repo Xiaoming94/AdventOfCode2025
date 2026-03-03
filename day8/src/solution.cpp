@@ -131,7 +131,7 @@ namespace solution {
       std::pair<Edge, Circuit::Vec_t> mergeCircuits(std::uint32_t nWires) {
         auto edges = createGraphEdges();
         auto [circuits, idToCircuits] = createCircuit();
-        auto finalEdge = internal::Edge{.node1Id = 1u, .node2Id = 1u, .length = 0u};
+        auto finalEdge = Edge{.node1Id = 1u, .node2Id = 1u, .length = 0u};
         while (not edges.empty() && nWires > 0 && circuits.size() > 1u) {
           finalEdge = edges.top();
           auto circuit1 = idToCircuits.at(finalEdge.node1Id);
