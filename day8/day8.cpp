@@ -18,4 +18,5 @@ int main() {
 
   std::println("Problem input is: \n{}", input);
   std::println("Problem 1 solution is: {}", solution::solveProblem1(input, 1000u));
+  std::println("Problem 2 solution is: {}", solution::solveProblem2(input));
 }
