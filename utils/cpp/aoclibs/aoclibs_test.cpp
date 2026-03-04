@@ -22,6 +22,13 @@ TEST(InputReaderTest, testReadingMultiLineStream) {
   EXPECT_THAT(result, HasSubstr("Line2"));
 }
 
+TEST(InputReaderTest, DISABLED_testNoTrailingNewLine) {
+  std::stringstream source;
+  source << "Some Input";
+  auto result = aoclibs::readInput(source);
+  EXPECT_NE('\n', result.back());
+}
+
 class Solution {
  public:
   virtual ~Solution() {};
@@ -54,4 +61,15 @@ TEST_F(RunSolutionTest, verifyThatOnlyOneFunctionIsCalled) {
   aoclibs::runSolution(expectedInput, [&](std::string_view input) {
     return m_mockSolution->solveProblem1(input);
   });
+}
+
+TEST_F(RunSolutionTest, verifyThatBothFunctionsAreCalled) {
+  constexpr auto expectedInput{"Input"};
+  EXPECT_CALL(*m_mockSolution, solveProblem1(expectedInput)).WillOnce(Return("solution 1"));
+  EXPECT_CALL(*m_mockSolution, solveProblem2(expectedInput)).WillOnce(Return("soluiton 2"));
+
+  aoclibs::runSolution(
+      expectedInput,
+      [&](std::string_view input) { return m_mockSolution->solveProblem1(input); },
+      [&](std::string_view input) { return m_mockSolution->solveProblem2(input); });
 }
