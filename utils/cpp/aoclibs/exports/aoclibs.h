@@ -26,7 +26,7 @@ namespace aoclibs {
    * @return a string with the content from the stream of multiple lines
    */
   template <typename stream_t>
-  str_t readInput(stream_t&& source = std::cin) {
+  str_t readInput(stream_t&& source) {
     str_t input{""};
     for (str_t line; std::getline(source, line);) {
       input += line + "\n";
@@ -40,7 +40,7 @@ namespace aoclibs {
   }
 
   using solutionFunction_t = std::function<str_t(std::string_view)>;
-  str_t unimplemented(std::string_view) {
+  inline str_t unimplemented(std::string_view) {
     return "unimplemented";
   }
 
