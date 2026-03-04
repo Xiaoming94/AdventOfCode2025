@@ -1,0 +1,64 @@
+# .clang-format
+
+BasedOnStyle: Google
+Language: Cpp
+Standard: c++20
+
+# Indentation
+IndentWidth: 2
+ContinuationIndentWidth: 4
+TabWidth: 2
+UseTab: Never
+
+# Line length
+ColumnLimit: 100
+
+# Wrapping behavior
+BreakBeforeBinaryOperators: All
+BreakBinaryOperations: OnePerLine
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakAssignment: 1
+PenaltyBreakComment: 300
+
+# Allow breaking after assignment for pipelines
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# Improve formatting of chained calls / pipelines
+AlignAfterOpenBracket: Align
+AlignOperands: Align
+BinPackArguments: false
+BinPackParameters: false
+
+# Template handling (important for std::views / std::to)
+BreakTemplateDeclarations: Yes
+SpacesInAngles: false
+
+# Namespace handling
+NamespaceIndentation: All
+
+# Include ordering (Google style)
+SortIncludes: true
+IncludeBlocks: Regroup
+
+# Misc
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInContainerLiterals: false
+Cpp11BracedListStyle: true
+
+# Keep lambdas readable inside views
+AllowShortLambdasOnASingleLine: Inline
+
+# Prevent collapsing long statements
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+
+# Constructor formatting
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+ConstructorInitializerIndentWidth: 2
+AllowAllConstructorInitializersOnNextLine: false
+
