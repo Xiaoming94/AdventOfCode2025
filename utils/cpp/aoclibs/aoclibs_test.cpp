@@ -22,7 +22,7 @@ TEST(InputReaderTest, testReadingMultiLineStream) {
   EXPECT_THAT(result, HasSubstr("Line2"));
 }
 
-TEST(InputReaderTest, DISABLED_testNoTrailingNewLine) {
+TEST(InputReaderTest, testNoTrailingNewLine) {
   std::stringstream source;
   source << "Some Input";
   auto result = aoclibs::readInput(source);
