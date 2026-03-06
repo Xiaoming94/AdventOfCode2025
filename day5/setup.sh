@@ -20,6 +20,8 @@ function setup_python() {
         local python_v=$(python --version)
         printf "Setting up python venv for for %s\n" $python_v
         python -m venv $envpath
+        python -m ensurepip --default-pip
+        pip install pytest
     fi
 
     printf "Activating Python VirtualEnv\n"
