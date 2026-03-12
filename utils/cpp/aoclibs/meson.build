@@ -48,7 +48,9 @@ test_exe = executable(
   link_with : lib,
 )
 
-test('aoclibs', test_exe, env : ['GTEST_COLOR=yes'])
+if not meson.is_subproject()
+  test('aoclibs', test_exe, env : ['GTEST_COLOR=yes'])
+endif
 
 # Make this library usable as a Meson subproject.
 aoclibs_dep = declare_dependency(

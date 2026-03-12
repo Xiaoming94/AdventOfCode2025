@@ -8,7 +8,12 @@ project(
 
 aoc_includes = include_directories('inc')
 
+aoclibs = subproject('aoclibs')
+aoclibs_dep = aoclibs.get_variable('aoclibs_dep')
+
+
 dependencies = [
+  aoclibs_dep
 ]
 
 cpp_sourcefiles = files('src/solution.cpp')

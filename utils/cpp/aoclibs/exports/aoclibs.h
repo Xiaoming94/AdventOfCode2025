@@ -43,7 +43,6 @@ namespace aoclibs {
   inline str_t unimplemented(std::string_view) {
     return "unimplemented";
   }
-
   /**
    * @brief Function that is meant to run and display the solutions.
    *
@@ -55,4 +54,26 @@ namespace aoclibs {
                                   solutionFunction_t solveProblem1,
                                   solutionFunction_t solveProblem2 = &unimplemented);
 
+  template <typename F1>
+  int aocMain(F1 solveProblem1) {
+    auto solutionConverter = [&solveProblem1](std::string_view input) {
+      return std::to_string(solveProblem1(input));
+    };
+    runSolution(readInput(std::cin), solutionConverter);
+    return 0;
+  }
+
+  template <typename F1, typename F2>
+  int aocMain(F1 solveProblem1, F2 solveProblem2) {
+    auto solution1Converter = [&solveProblem1](std::string_view input) {
+      return std::to_string(solveProblem1(input));
+    };
+
+    auto solution2Converter = [&solveProblem2](std::string_view input) {
+      return std::to_string(solveProblem2(input));
+    };
+
+    runSolution(readInput(std::cin), solution1Converter, solution2Converter);
+    return 0;
+  }
 }  // namespace aoclibs
