@@ -39,6 +39,7 @@
 # subproject directories
 /subprojects/*
 !/subprojects/*.wrap
+!/subprojects/aoclibs
 
 # Meson Directories
 meson-logs

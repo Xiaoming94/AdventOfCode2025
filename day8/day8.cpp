@@ -1,22 +1,13 @@
 #define PROJECT_NAME "day8"
 
-#include <iostream>
-#include <print>
-#include <string>
+#include <aoclibs.h>
 
 #include "solution.h"
 
 int main() {
-  std::string input{""};
-  for (std::string line; std::getline(std::cin, line);) {
-    input += line + "\n";
-  }
-
-  if (input.back() == '\n') {
-    input.pop_back();
-  }
-
-  std::println("Problem input is: \n{}", input);
-  std::println("Problem 1 solution is: {}", solution::solveProblem1(input, 1000u));
-  std::println("Problem 2 solution is: {}", solution::solveProblem2(input));
+  constexpr auto nWires{1000};
+  auto solution1Function = [](std::string_view input) {
+    return solution::solveProblem1(input, nWires);
+  };
+  aoclibs::aocMain(solution1Function, &solution::solveProblem2);
 }

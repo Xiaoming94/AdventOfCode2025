@@ -12,7 +12,10 @@ aoc_includes = include_directories('inc')
 cpp_sourcefiles = files('src/solution.cpp')
 
 # Main executable
+aoclibs = subproject('aoclibs')
+aoclibs_dep = aoclibs.get_variable('aoclibs_dep')
 dependencies = [
+  aoclibs_dep
 ]
 
 exe = executable(
