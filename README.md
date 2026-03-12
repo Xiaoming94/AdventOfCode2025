@@ -31,3 +31,4 @@ Each `dayN/` directory also includes a small readme detailing my thought process
 | 5 | python |
 | 6 | rust |
 | 7 | java |
+| 8 | c++ |
